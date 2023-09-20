@@ -26,7 +26,7 @@ docker run -e SLACK_ACCESS_TOKEN=<SlackToken> slack-logger -NRAccountId=<xyz4> -
  -logLevel=info -userLogs -channelDetails -accessLogs
 ```
 #### Option 2: Standalone binary
-- Build binary from source code
+- Build binary from the source code
 ```bash
   git clone https://github.com/newrelic-experimental/SlackLogsIntegration.git
   cd SlackLogsIntegration
