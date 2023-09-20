@@ -5,56 +5,47 @@
 Send follwoing Slack API logs to New Relic's Log API. 🚧 This project is currently work in progress and supprots following logs collection
 - [ChannelDetail](https://api.slack.com/methods/conversations.list)
 - [UserLogs](https://api.slack.com/methods/users.list)
-- [AccessLogs](https://slack.com/api/team.accessLogs)
+- [AccessLogs](https://api.slack.com/methods/team.accessLogs)
 
-## Installation
-Slack logs integration can be installed in two ways
 ### Prerequisites
 - Install slack APP with required permissions and collect user token. Current solution requires following permissions.<br> 
-  admin, users:read, channels:read, teams:read
-  
+       admin, users:read, channels:read, teams:read
+
   Please refer [Development](#Development) if you need help to create a slack app
 
-### Option 1: Docker Container
+### Installation
+Slack logs integration can be installed in two ways
 
-#### Step 1: Install the app and get it ready to run
-[//]: # (TODO create GitHub Releases)
-- Build the Docker image  ( `docker build  --tag slack-logger .` ) using this `Dockerfile`
-```dockerfile
-# syntax=docker/dockerfile:1
-# Step 1: Build the application from source
-FROM golang:1.21-alpine AS build-stage
-
-WORKDIR /build
-
-# The Go image does not include git, add it to Alpine
-RUN apk add git
-
-RUN git clone https://github.com/newrelic-experimental/SlackLogsIntegration.git
-
-WORKDIR SlackLogsIntegration
-
-# Install the application's Go dependencies
-RUN go mod download
-
-# Build the executable
-RUN GOARCH=amd64 GOOS=linux go build -o /slackLogger internal/main.go
-
-# Step 2: Deploy the application binary into a lean image
-FROM alpine AS build-release-stage
-
-WORKDIR /
-
-COPY --from=build-stage /slackLogger /slackLogger
-
-ENTRYPOINT ["/slackLogger" ]
+#### Option 1: Docker Container
+- Build docker image using [Dockerfile](https://github.com/newrelic-experimental/SlackLogsIntegration/blob/main/Dockerfile)
+  ( `docker build  --tag slack-logger .` )  
+- Refer [Configuration](#configuration) for available config options
+- Start the application in side the container, with required params
+```bash
+docker run -e SLACK_ACCESS_TOKEN=<SlackToken> slack-logger -NRAccountId=<xyz4> -NREndpoint=https://log-api.newrelic.com/log/v1 
+ -logLevel=info -userLogs -channelDetails -accessLogs
+```
+#### Option 2: Standalone binary
+- Build binary from source code
+```bash
+  git clone https://github.com/newrelic-experimental/SlackLogsIntegration.git
+  cd SlackLogsIntegration
+  go mod download
+  GOARCH=amd64 GOOS=linux go build -o /slackLogger internal/main.go
+```
+- Refer [Configuration](#configuration) for available config options
+- Export SLACK_ACCESS_TOKEN=<slackToken>
+- Start application directly on host
+```bash
+  /slackLogger -NRAccountId=<xyz4> -NREndpoint=https://log-api.newrelic.com/log/v1 -logLevel=debug -channelDetails -userLogs -accessLogs
 ```
 
-- Prepare, but DO NOT run, the application to run as a detached process that can survive user logout. How to do this is beyond the scope of this document, here is the reference for Docker:
-  - [Docker on Linux](https://linux.how2shout.com/how-to-start-docker-container-automatically-on-boot-in-linux/)
+- Prepare, but DO NOT run, the application to run as a detached process that can survive user logout. How to do this is beyond the scope of this document, here are some useful references:
+  - [systemd on Linux] (http://tuxgraphics.org/npa/systemd-scripts/)
+  - [User defined Service on Windows] (https://learn.microsoft.com/en-us/troubleshoot/windows-client/deployment/create-user-defined-service)
+  - [Docker on Linux] (https://linux.how2shout.com/how-to-start-docker-container-automatically-on-boot-in-linux/)
 
-
-#### Step 2: Configuration
+### Configuration
 Configuration with defaults is self-describing for this application:
 ```bash
 Usage of /slackLogger:
@@ -67,49 +58,22 @@ Usage of /slackLogger:
   -channelDetails
     	Fetch channel details
   -flushInterval int
-    	Flush interval (default 1440)
+    	Flush interval in minutes (default 1440)
   -logLevel string
     	Golang slog log level: debug | info | warn | error (default "info")
   -userLogs
     	Fetch user logs
 ```
 
-Configuration begins with command line arguments, which may then be overridden with environment variables.
-Following command works
-
-```bash
-/slackLogger -NRAccountId=<xyz4> -NREndpoint=https://log-api.newrelic.com/log/v1 -logLevel=debug -channelDetails -userLogs -accessLogs
-```
-
-#### Step 4: Finish configuring the app and start it
-- Start the application, with required params
-```bash
-docker run -e SLACK_ACCESS_TOKEN=<SlackToken> slack-logger -NRAccountId=<xyz4> -NREndpoint=https://log-api.newrelic.com/log/v1 
- -logLevel=info -userLogs -channelDetails -accessLogs
-```
-#### Step 5: Go to New Relic and marvel at your Log data
+### Browse your Log data in NR
 - [Login into One New Relic](https://one.newrelic.com)
 - Open `Query Your Data` ![Alt text](./images/nr1-step-1.png)
 - Query the data using NRQL ![Alt text](./images/nr1-step-2.png) 
   - select * from Log  where logtype='ChannelDetail' since 1 day ago
- 
-### Option 2: Standalone binary Installation
-
-```bash
-- git clone https://github.com/newrelic-experimental/SlackLogsIntegration.git
-- cd SlackLogsIntegration
-- go mod download
-- GOARCH=amd64 GOOS=linux go build -o /slackLogger internal/main.go
-- export SLACK_ACCESS_TOKEN
-- /slackLogger -NRAccountId=<xyz4> -NREndpoint=https://log-api.newrelic.com/log/v1 -logLevel=debug -channelDetails -userLogs -accessLogs
-```
-- Prepare, but DO NOT run, the application to run as a detached process that can survive user logout. How to do this is beyond the scope of this document, here is the reference for systemd service in Linux:
-[Service in Linux](http://tuxgraphics.org/npa/systemd-scripts/)
 
 ## Troubleshooting
-
-### Slack API key permissions
-   Please check whether Slack app has installed with proper permissions 
+- Please check whether Slack app has installed with proper permissions.
+- Please refer FAQ document
 
 ## Development
 - [Create new slack APP](https://api.slack.com/start/quickstart)
