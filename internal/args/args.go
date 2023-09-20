@@ -3,6 +3,7 @@ package args
 import (
 	"flag"
 	"log/slog"
+	"log"
 	"os"
 	"strings"
 )
