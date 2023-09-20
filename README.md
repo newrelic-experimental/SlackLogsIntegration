@@ -56,6 +56,7 @@ ENTRYPOINT ["/slackLogger" ]
   - [Docker on Linux] (https://linux.how2shout.com/how-to-start-docker-container-automatically-on-boot-in-linux/)
 
 
+
 ## Step 2: Configuration
 Configuration with defaults is self-describing for this application:
 ```bash
