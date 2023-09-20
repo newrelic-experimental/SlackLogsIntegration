@@ -29,7 +29,6 @@ docker run -e SLACK_ACCESS_TOKEN=<SlackToken> -IngestKey=<key> -LogApiEndpoint=h
 ```bash
   git clone https://github.com/newrelic-experimental/SlackLogsIntegration.git
   cd SlackLogsIntegration
-  go mod download
   GOARCH=amd64 GOOS=linux go build -o /slackLogger internal/main.go
 ```
 - Refer [Configuration](#configuration) for available config options
