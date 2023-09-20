@@ -1,0 +1,9 @@
+1) What is the flush interval command line option?
+  The ```flushInterval``` parameter allows you to customize the interval at which logs are fetched. By default it fetches at a 24-hour interval.
+
+2) How Access Log collection works?
+   By default,  SlackLogsIntegration fetches team access logs within the last 'flushInterval' duration. The default value for 'flushInterval' is 24 hours.
+
+3) Is there any database used in between?
+   No. It retrives logs from the Slack API and forwards to New Relic.
+
