@@ -11,7 +11,7 @@ Send follwoing Slack API logs to New Relic's Log API. 🚧 This project is curre
 - Install slack APP with required permissions and collect user token. Current solution requires following permissions.<br> 
       ```admin, users:read, channels:read, teams:read```
 
-  Please refer [Development](#Development) if you need help to create a slack app
+  Please refer [Development](##Development) if you need help to create a slack app
 
 ### Installation
 Slack logs integration can be installed in two ways
