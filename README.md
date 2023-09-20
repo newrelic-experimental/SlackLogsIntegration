@@ -68,7 +68,7 @@ Usage of /slackLogger:
 
 ## Troubleshooting
 - Please check whether Slack app has installed with proper permissions.
-- Please refer FAQ[FAQ.txt] document
+- Please refer FAQ[https://github.com/newrelic-experimental/SlackLogsIntegration/blob/update-readme/FAQ.txt]
 
 ## Development
 - [Create new slack APP](https://api.slack.com/start/quickstart)
