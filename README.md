@@ -22,8 +22,7 @@ Slack logs integration can be installed in two ways
 - Refer [Configuration](#configuration) for available config options
 - Start the application in side the container, with required params
 ```bash
-docker run -e SLACK_ACCESS_TOKEN=<SlackToken> slack-logger -NRAccountId=<xyz4> -NREndpoint=https://log-api.newrelic.com/log/v1 
- -logLevel=info -userLogs -channelDetails -accessLogs
+docker run -e SLACK_ACCESS_TOKEN=<SlackToken> -IngestKey=<key> -LogApiEndpoint=https://log-api.newrelic.com/log/v1 -logLevel=debug  -channelDetails  -userLogs -accessLogs
 ```
 #### Option 2: Standalone binary
 - Build binary from the source code
@@ -37,7 +36,7 @@ docker run -e SLACK_ACCESS_TOKEN=<SlackToken> slack-logger -NRAccountId=<xyz4> -
 - Export SLACK_ACCESS_TOKEN=<slackToken>
 - Start application directly on host
 ```bash
-  /slackLogger -NRAccountId=<xyz4> -NREndpoint=https://log-api.newrelic.com/log/v1 -logLevel=debug -channelDetails -userLogs -accessLogs
+  /slackLogger -IngestKey=<key> -LogApiEndpoint=https://log-api.newrelic.com/log/v1 -logLevel=debug  -channelDetails  -userLogs -accessLogs
 ```
 
 ### Configuration
