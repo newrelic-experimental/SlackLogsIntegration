@@ -8,13 +8,12 @@ Send follwoing Slack API logs to New Relic's Log API. 🚧 This project is curre
 - [AccessLogs](https://slack.com/api/team.accessLogs)
 
 ## Installation
-Slack logs integration can be installed in two ways 
+Slack logs integration can be installed in two ways
 ### Prerequisites
 - Install slack APP with required permissions and collect user token. Current solution requires following permissions.<br> 
-  ```bash
   admin, users:read, channels:read, teams:read
-  ``` 
-  Please refer [Development](#Development) if you need help here
+  
+  Please refer [Development](#Development) if you need help to create a slack app
 
 ### Option 1: Docker Container
 
@@ -31,9 +30,9 @@ WORKDIR /build
 # The Go image does not include git, add it to Alpine
 RUN apk add git
 
-RUN git clone https://github.com/newrelic-experimental/slack-logs-integration.git
+RUN git clone https://github.com/newrelic-experimental/SlackLogsIntegration.git
 
-WORKDIR slack-logs-integration
+WORKDIR SlackLogsIntegration
 
 # Install the application's Go dependencies
 RUN go mod download
@@ -50,14 +49,12 @@ COPY --from=build-stage /slackLogger /slackLogger
 
 ENTRYPOINT ["/slackLogger" ]
 ```
-- Prepare, but DO NOT run, the application to run as a detached process that can survive user logout. How to do this is beyond the scope of this document, here are some useful references:
-  - [systemd on Linux] (http://tuxgraphics.org/npa/systemd-scripts/)
-  - [User defined Service on Windows] (https://learn.microsoft.com/en-us/troubleshoot/windows-client/deployment/create-user-defined-service)
+
+- Prepare, but DO NOT run, the application to run as a detached process that can survive user logout. How to do this is beyond the scope of this document, here is the reference for Docker:
   - [Docker on Linux] (https://linux.how2shout.com/how-to-start-docker-container-automatically-on-boot-in-linux/)
 
 
-
-## Step 2: Configuration
+#### Step 2: Configuration
 Configuration with defaults is self-describing for this application:
 ```bash
 Usage of /slackLogger:
@@ -84,22 +81,30 @@ Following command works
 /slackLogger -NRAccountId=<xyz4> -NREndpoint=https://log-api.newrelic.com/log/v1 -logLevel=debug -channelDetails -userLogs -accessLogs
 ```
 
-### Step 4: Finish configuring the app and start it
+#### Step 4: Finish configuring the app and start it
 - Start the application, with required params
 ```bash
-docker run -e SLACK_ACCESS_TOKEN=<SlackToken> slack-logger -NRAccountId=<xyz4> -NREndpoint=https://log-api.newrelic.com/log/v1 -logLevel=info -userLogs -channelDetails -accessLogs
+docker run -e SLACK_ACCESS_TOKEN=<SlackToken> slack-logger -NRAccountId=<xyz4> -NREndpoint=https://log-api.newrelic.com/log/v1 
+ -logLevel=info -userLogs -channelDetails -accessLogs
 ```
-### Step 5: Go to New Relic and marvel at your Log data
+#### Step 5: Go to New Relic and marvel at your Log data
 - [Login into One New Relic](https://one.newrelic.com)
 - Open `Query Your Data` ![Alt text](./images/nr1-step-1.png)
 - Query the data using NRQL ![Alt text](./images/nr1-step-2.png) 
   - select * from Log  where logtype='ChannelDetail' since 1 day ago
  
-### Option 2: Standalone Binary Installation
-- git clone https://github.com/newrelic-experimental/slack-logs-integration.git
-- Build binary
-- Run using CLI
+### Option 2: Standalone binary Installation
 
+```bash
+- git clone https://github.com/newrelic-experimental/SlackLogsIntegration.git
+- cd SlackLogsIntegration
+- go mod download
+- GOARCH=amd64 GOOS=linux go build -o /slackLogger internal/main.go
+- export SLACK_ACCESS_TOKEN
+- /slackLogger -NRAccountId=<xyz4> -NREndpoint=https://log-api.newrelic.com/log/v1 -logLevel=debug -channelDetails -userLogs -accessLogs
+```
+- Prepare, but DO NOT run, the application to run as a detached process that can survive user logout. How to do this is beyond the scope of this document, here is the reference for systemd service in Linux:
+[Service in Linux](http://tuxgraphics.org/npa/systemd-scripts/)
 
 ## Troubleshooting
 
