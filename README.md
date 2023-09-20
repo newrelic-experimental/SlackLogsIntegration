@@ -8,10 +8,10 @@ Send following Slack API logs to New Relic's Log API. 🚧 This project is curre
 - [AccessLogs](https://api.slack.com/methods/team.accessLogs)
 
 ### Prerequisites
-- Install slack APP with required permissions and collect user token. Currently, SlackLogsIntegration requires following permissions.
+- Install Slack APP with required permissions and collect user token. Currently, SlackLogsIntegration requires following permissions.
       ```admin, users:read, channels:read, teams:read```
 
-  Please refer [Development](##Development) if you need help to create a slack app
+  Please refer [Development](##Development) if you need help to create a Slack app
 
 ### Installation
 Slack logs integration can be installed in two ways
@@ -42,9 +42,9 @@ docker run -e SLACK_ACCESS_TOKEN=<SlackToken> -IngestKey=<key> -LogApiEndpoint=h
 Configuration with defaults is self-describing for this application:
 ```bash
 Usage of /slackLogger:
-  -NRAccountId string
-    	If set, sends logs to New Relic (default "xyz1234")
-  -NREndpoint string
+  -IngestKey string
+    	New Relic Ingest key
+  -LogApiEndpoint string
     	New Relic log endpoint (default "https://log-api.newrelic.com/log/v1")
   -accessLogs
     	Fetch access logs
