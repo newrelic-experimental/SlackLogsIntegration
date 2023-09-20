@@ -18,16 +18,20 @@ var (
 )
 
 func init() {
-	flag.StringVar(&nrAccount, "NRAccountId", "xyz1234", "If set, sends logs to New Relic")
-	flag.StringVar(&nrUrlLog, "NREndpoint", "https://log-api.newrelic.com/log/v1", "New Relic log endpoint")
+	flag.StringVar(&nrAccount, "IngestKey", "", "New Relic Ingest key")
+	flag.StringVar(&nrUrlLog, "LogApiEndpoint", "https://log-api.newrelic.com/log/v1", "New Relic log endpoint")
 	flag.BoolVar(&fetchChannelDetails, "channelDetails", false, "Fetch channel details")
 	flag.BoolVar(&fetchUserLogs, "userLogs", false, "Fetch user logs")
 	flag.BoolVar(&fetchAccessLogs, "accessLogs", false, "Fetch access logs")
 	flag.StringVar(&logLevel, "logLevel", "info", "Golang slog log level: debug | info | warn | error")
-	flag.IntVar(&flushInterval, "flushInterval", 1440, "Flush interval")
-	// TODO: will add other logs
+	flag.IntVar(&flushInterval, "flushInterval", 1440, "Flush interval in minutes")
 
 	flag.Parse()
+
+	if nrAccount == "" {
+		log.Fatalln("Please provide New Relic ingest Key")
+	}
+
 	// Setup slog
 	var programLevel = new(slog.LevelVar) // Info by default
    	h := slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: programLevel})

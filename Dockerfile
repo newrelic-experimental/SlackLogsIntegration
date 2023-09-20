@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-# Step 1: Build the application from source
 FROM golang:1.21-alpine AS build-stage
 
 WORKDIR /build
@@ -7,9 +5,12 @@ WORKDIR /build
 # The Go image does not include git, add it to Alpine
 RUN apk add git
 
-RUN git clone https://github.com/newrelic-experimental/slack-logs-integration.git
+RUN git clone https://github.com/newrelic-experimental/SlackLogsIntegration.git
 
-WORKDIR slack-logs-integration
+WORKDIR SlackLogsIntegration
+
+# Install the application's Go dependencies
+RUN go mod download
 
 # Build the executable
 RUN GOARCH=amd64 GOOS=linux go build -o /slackLogger internal/main.go
