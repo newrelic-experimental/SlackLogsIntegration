@@ -51,7 +51,7 @@ ENTRYPOINT ["/slackLogger" ]
 ```
 
 - Prepare, but DO NOT run, the application to run as a detached process that can survive user logout. How to do this is beyond the scope of this document, here is the reference for Docker:
-  - [Docker on Linux] (https://linux.how2shout.com/how-to-start-docker-container-automatically-on-boot-in-linux/)
+  - [Docker on Linux](https://linux.how2shout.com/how-to-start-docker-container-automatically-on-boot-in-linux/)
 
 
 #### Step 2: Configuration
