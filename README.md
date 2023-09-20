@@ -9,7 +9,7 @@ Send follwoing Slack API logs to New Relic's Log API. 🚧 This project is curre
 
 ### Prerequisites
 - Install slack APP with required permissions and collect user token. Current solution requires following permissions.<br> 
-       admin, users:read, channels:read, teams:read
+      ```admin, users:read, channels:read, teams:read```
 
   Please refer [Development](#Development) if you need help to create a slack app
 
@@ -40,11 +40,6 @@ docker run -e SLACK_ACCESS_TOKEN=<SlackToken> slack-logger -NRAccountId=<xyz4> -
   /slackLogger -NRAccountId=<xyz4> -NREndpoint=https://log-api.newrelic.com/log/v1 -logLevel=debug -channelDetails -userLogs -accessLogs
 ```
 
-- Prepare, but DO NOT run, the application to run as a detached process that can survive user logout. How to do this is beyond the scope of this document, here are some useful references:
-  - [systemd on Linux] (http://tuxgraphics.org/npa/systemd-scripts/)
-  - [User defined Service on Windows] (https://learn.microsoft.com/en-us/troubleshoot/windows-client/deployment/create-user-defined-service)
-  - [Docker on Linux] (https://linux.how2shout.com/how-to-start-docker-container-automatically-on-boot-in-linux/)
-
 ### Configuration
 Configuration with defaults is self-describing for this application:
 ```bash
@@ -73,7 +68,7 @@ Usage of /slackLogger:
 
 ## Troubleshooting
 - Please check whether Slack app has installed with proper permissions.
-- Please refer FAQ document
+- Please refer FAQ[FAQ.txt] document
 
 ## Development
 - [Create new slack APP](https://api.slack.com/start/quickstart)
