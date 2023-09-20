@@ -2,7 +2,7 @@
 
 
 # Slack Logs to New Relic Log API
-Send following Slack API logs to New Relic's Log API. 🚧 This project is currently work in progress and supprots following logs collection
+Send following Slack API logs to New Relic's Log API. 🚧 This project is currently work in progress and supports following logs collection
 - [ChannelDetail](https://api.slack.com/methods/conversations.list)
 - [UserLogs](https://api.slack.com/methods/users.list)
 - [AccessLogs](https://api.slack.com/methods/team.accessLogs)
