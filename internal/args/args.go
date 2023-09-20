@@ -18,8 +18,8 @@ var (
 )
 
 func init() {
-	flag.StringVar(&nrAccount, "NRAccountId", "xyz1234", "If set, sends logs to New Relic")
-	flag.StringVar(&nrUrlLog, "NREndpoint", "https://log-api.newrelic.com/log/v1", "New Relic log endpoint")
+	flag.StringVar(&nrAccount, "IngestKey", "xyz1234", "New Relic Ingest key")
+	flag.StringVar(&nrUrlLog, "LogApiEndpoint", "https://log-api.newrelic.com/log/v1", "New Relic log endpoint")
 	flag.BoolVar(&fetchChannelDetails, "channelDetails", false, "Fetch channel details")
 	flag.BoolVar(&fetchUserLogs, "userLogs", false, "Fetch user logs")
 	flag.BoolVar(&fetchAccessLogs, "accessLogs", false, "Fetch access logs")
