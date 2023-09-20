@@ -71,7 +71,8 @@ Usage of /slackLogger:
 - Please refer FAQ[https://github.com/newrelic-experimental/SlackLogsIntegration/blob/update-readme/FAQ.txt]
 
 ## Development
-- [Create new slack APP](https://api.slack.com/start/quickstart)
+- [Create a new Slack APP](https://api.slack.com/start/quickstart)
+- [Slack App home page](https://api.slack.com/apps)
 - [Slack access token authentication](https://api.slack.com/authentication/oauth-v2)
 - Verify token validay by triggering respective [API call](https://api.slack.com/methods/conversations.list/test)    
 
