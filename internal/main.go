@@ -19,7 +19,7 @@ var slackToken string
 func updateSlackToken() {
         val, ok := os.LookupEnv("SLACK_ACCESS_TOKEN")
         if !ok {
-                log.Fatalln("**** Slack access token not set ***** ")
+                log.Fatalln("**** Please set SLACK_ACCESS_TOKEN. ***** ")
         }
 	slackToken = val
 }

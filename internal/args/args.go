@@ -19,7 +19,6 @@ var (
 )
 
 func init() {
-	flag.StringVar(&nrAccount, "IngestKey", "", "New Relic Ingest key")
 	flag.StringVar(&nrUrlLog, "LogApiEndpoint", "https://log-api.newrelic.com/log/v1", "New Relic log endpoint")
 	flag.BoolVar(&fetchChannelDetails, "channelDetails", false, "Fetch channel details")
 	flag.BoolVar(&fetchUserLogs, "userLogs", false, "Fetch user logs")
@@ -28,9 +27,13 @@ func init() {
 	flag.IntVar(&flushInterval, "flushInterval", 1440, "Flush interval in minutes")
 
 	flag.Parse()
+	if v, ok := os.LookupEnv("INGEST_KEY"); ok {
+		slog.Debug("IngestKey found in env", "key", v)
+		nrAccount = v
+	}
 
 	if nrAccount == "" {
-		log.Fatalln("Please provide New Relic ingest Key")
+		log.Fatalln("****  Please set INGEST_KEY. *****")
 	}
 
 	// Setup slog
@@ -49,6 +52,7 @@ func init() {
 	default:
 		programLevel.Set(slog.LevelInfo)
    	}
+
 }
 
 func GetNRApiKey() string {
