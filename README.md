@@ -6,10 +6,11 @@ Send following Slack API logs to New Relic's Log API. 🚧 This project is curre
 - [ChannelDetail](https://api.slack.com/methods/conversations.list)
 - [UserLogs](https://api.slack.com/methods/users.list)
 - [AccessLogs](https://api.slack.com/methods/team.accessLogs)
+- [ConversationLogs](https://api.slack.com/methods/conversations.history)
 
 ### Prerequisites
 - Install Slack APP with required permissions and collect user token. Use this token as a SLACK_ACCESS_TOKEN system variable. Currently, SlackLogsIntegration requires following permissions.
-      ```admin, users:read, channels:read, teams:read```
+      ```admin, users:read, channels:read, teams:read, channels:history ```
 
   Please [refer Development](#Development) if you need help to create a Slack app.
 - Get New Relic ingest key. Use this key as a INGEST_KEY system variable.
@@ -33,21 +34,23 @@ docker run -e SLACK_ACCESS_TOKEN=<token> INGEST_KEY=<key> -logApiEndpoint=https:
   GOARCH=amd64 GOOS=linux go build -o /slackLogger internal/main.go
 ```
 - Refer [Configuration](#configuration) for available config options
-- ` Export SLACK_ACCESS_TOKEN=<token> `
-- ` Export INGEST_KEY=<key> `
+- ` export SLACK_ACCESS_TOKEN=<token> `
+- ` export INGEST_KEY=<key> `
 - Start application directly on host
 ```bash
-  /slackLogger -logApiEndpoint=https://log-api.newrelic.com/log/v1 -logLevel=info  -channelDetails  -userLogs -accessLogs
+  /slackLogger -logApiEndpoint=https://log-api.newrelic.com/log/v1 -logLevel=info  -channelDetails  -userLogs -accessLogs -conversationLogs
 ```
 
 ### Configuration
 Configuration with defaults is self-describing for this application:
 ```bash
 Usage of /slackLogger:
-  -accessLogs
+   -accessLogs
     	Fetch access logs
   -channelDetails
     	Fetch channel details
+  -conversationLogs
+    	Fetch conversation logs
   -flushInterval int
     	Flush interval in minutes (default 1440)
   -logApiEndpoint string
