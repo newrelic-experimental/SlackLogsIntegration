@@ -27,13 +27,41 @@ type Team struct {
 
 // Channel contains all the information of a conversation
 type Channel struct {
-        UserID           string         `json:"id"`
+        ID               string         `json:"id"`
         Name             string         `json:"name"`
         NumMembers       int             `json:"num_members"`
         Random           map[string]interface{} `json:"-"`
 	TeamName         string            `json:"team_name"`
 }
 
+type Conversation struct {
+	Type             string            `json:"type"`
+	ChannelID        string
+	TeamName         string            `json:"team"`
+	AppID            string            `json:"app_id"`
+	Text             string            `json:"text"`
+	User             string            `json:"user"`
+	TimeStamp        string                     `json:"ts"`
+	Blocks           []Block   `json:"blocks"`
+	RepliesList        []ConversationReply
+	ReplyCount       int               `json:"reply_count"`
+	Random           map[string]interface{} `json:"-"`
+}
+
+type ConversationReply struct {
+	Type             string         `json:"type"`
+	User             string         `json:"user"`
+	Text             string         `json:"text"`
+	ThreadTS	 string         `json:"thread_ts"`
+	ParentUserID     string         `json:"parent_user_id"`
+	TimeStamp        string         `json:"ts"`
+}
+
+type Block struct {
+	Type         string         `json:"type"`
+	BlockID      string         `json:"block_id"`
+	Elements     []map[string]interface{} `json:"elements"`
+}
 
 type ChannelSubInfo struct {
         Value    string       `json:"value"`

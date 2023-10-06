@@ -137,3 +137,27 @@ func (cl *ChannelLogsHandler) Collect(token string) error {
         time.Sleep(time.Duration(flushInterval) * time.Minute)
 	return nil
 }
+
+func GetChannels(token string) ([]string, error) {
+        slog.Info("Collecting channel ids")
+        nextCursor := ""
+	var channelList []string
+        for {
+                c := common.NewSlackClient(constants.SlackChannelAPIURL, token, nextCursor)
+                // Get Channel logs
+                response, err := getSlackChannelLogs(c)
+                if err != nil {
+                        return channelList, err
+                }
+		for _, l := range response.Channels {
+			channelList = append(channelList, l.ID)
+		}
+                next := response.ResponseMetaData.NextCursor
+                if next == "" {
+                        slog.Info("There is no next page, Wait for the next polling cycle to get latest channelDeatils")
+                        break
+                }
+                nextCursor = next
+        }
+	return channelList, nil
+}

@@ -7,4 +7,6 @@ const (
         SlackBillingInfoAPIURL = "https://slack.com/api/team.billableInfo"
         SlackaccessAPIURL = "https://slack.com/api/team.accessLogs"
 	SlackChannelAPIURL  = "https://slack.com/api/conversations.list"
+	SlackChannelHistoryAPIURL  = "https://slack.com/api/conversations.history"
+	SlackChannelRepliesAPIURL  = "https://slack.com/api/conversations.replies"
 )

@@ -7,6 +7,7 @@ import (
 	"slackLogs/internal/userlogs"
 	"slackLogs/internal/channellogs"
 	"slackLogs/internal/accesslogs"
+	"slackLogs/internal/conversationlogs"
 
 	"os"
 	"log/slog"
@@ -29,7 +30,7 @@ func collectAndExportLogsToNR(c common.CollectLogs) {
 		err := c.Collect(slackToken)
 		if err != nil {
 			// Log the error
-			log.Fatalln("Received an error in user logs collecting/exporting", err)
+			log.Fatalln("Received an error in collecting/exporting", err)
 		}
 	}
 }
@@ -47,6 +48,9 @@ func main() {
 	}
 	if  args.GetAccessLogsEnabled() {
 		go collectAndExportLogsToNR(accesslogs.NewAccessLogsHandler(logClient))
+	}
+	if  args.GetConversationLogsnabled() {
+		go collectAndExportLogsToNR(conversationlogs.NewConversationLogsHandler(logClient))
 	}
 	// TODO: signal handling
 	select {}

@@ -56,14 +56,20 @@ func WaitAndRetry(resp *http.Response) bool {
 
 func (c *SlackClient) SendRequest(retryCallback RetryCallback, responseData interface{}, optionalParams ...map[string]string) error {
 	params := url.Values{}
-	params.Add("limit", strconv.Itoa(c.DefaultLimit))
+	limited := false
 	if c.Cursor != "" {
 		params.Add("cursor", c.Cursor)
 	}
 	if len(optionalParams) > 0 {
 		opts := optionalParams[0]
 		for param, value := range opts {
+			if param == "limit" {
+				limited = true
+			}
 			params.Add(param, value)
+		}
+		if !limited {
+			params.Add("limit", strconv.Itoa(c.DefaultLimit))
 		}
 	}
 

@@ -14,6 +14,7 @@ var (
 	fetchAccessLogs bool
 	fetchChannelDetails  bool
 	fetchUserLogs   bool
+	fetchConversationLogs   bool
 	logLevel   string
 	flushInterval   int
 )
@@ -23,6 +24,7 @@ func init() {
 	flag.BoolVar(&fetchChannelDetails, "channelDetails", false, "Fetch channel details")
 	flag.BoolVar(&fetchUserLogs, "userLogs", false, "Fetch user logs")
 	flag.BoolVar(&fetchAccessLogs, "accessLogs", false, "Fetch access logs")
+	flag.BoolVar(&fetchConversationLogs, "conversationLogs", false, "Fetch conversation logs")
 	flag.StringVar(&logLevel, "logLevel", "info", "Golang slog log level: debug | info | warn | error")
 	flag.IntVar(&flushInterval, "flushInterval", 1440, "Flush interval in minutes")
 
@@ -73,6 +75,10 @@ func GetAccessLogsEnabled() bool {
 
 func GetChannelDetailsEnabled() bool {
 	return fetchChannelDetails
+}
+
+func GetConversationLogsnabled() bool {
+	return fetchConversationLogs
 }
 
 func GetUserLogsEnabled() bool {
