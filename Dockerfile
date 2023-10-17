@@ -19,4 +19,4 @@ WORKDIR /
 
 COPY --from=build-stage /slackLogger /slackLogger
 
-ENTRYPOINT ["/slackLogger", "-channelDetails",  "-userLogs", "-accessLogs", "-conversationLogs" ]
+ENTRYPOINT ["/slackLogger" ]
