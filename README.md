@@ -20,7 +20,7 @@ Slack logs integration can be installed in two ways
 
 #### Option 1: Docker Container
 - Build docker image using [Dockerfile](https://github.com/newrelic-experimental/SlackLogsIntegration/blob/main/Dockerfile)
-  ( `docker build  --tag slack-logger .` )  
+  ( `docker build --no-cache --tag slack-logger .` )  
 - Refer [Configuration](#configuration) for available config options
 - Start the application in side the container, with required params
 ```bash
