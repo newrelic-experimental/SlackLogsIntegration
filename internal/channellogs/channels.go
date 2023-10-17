@@ -125,7 +125,7 @@ func (cl *ChannelLogsHandler) Collect(token string) error {
 		}
 		next := response.ResponseMetaData.NextCursor
 		if next == "" {
-			slog.Info("There is no next page, Wait for the next polling cycle to get latest channelDeatils")
+			slog.Info("There is no next page, Wait for the next polling cycle to get latest channelDetails")
         		cl.ResetLogs()
 			break
 		}
@@ -154,7 +154,7 @@ func GetChannels(token string) ([]string, error) {
 		}
                 next := response.ResponseMetaData.NextCursor
                 if next == "" {
-                        slog.Info("There is no next page, Wait for the next polling cycle to get latest channelDeatils")
+                        slog.Debug("Done with fetching all the channels, now iterate through the channels to get conversations")
                         break
                 }
                 nextCursor = next

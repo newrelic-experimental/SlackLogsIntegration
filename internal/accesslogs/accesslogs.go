@@ -136,7 +136,7 @@ func (al *accessLogsHandler) Collect(token string) error {
 			return err
 		}
 		if collectedLogs {
-			slog.Info("Successfully fetched accessLogs for the required interval")
+			slog.Debug("Successfully fetched accessLogs for the required interval")
 			break
 		}
 		// Check total collected logs size and maximum allowed logs size in a single request
