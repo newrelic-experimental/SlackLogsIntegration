@@ -9,7 +9,7 @@ Send following Slack API logs to New Relic's Log API. 🚧 This project is curre
 - [ConversationLogs](https://api.slack.com/methods/conversations.history)
 
 ### Prerequisites
-- Install Slack APP with required permissions and collect user token. Use this token as a SLACK_ACCESS_TOKEN system variable. Currently, SlackLogsIntegration requires following permissions.
+- Install Slack app with required permissions and collect user token. Use this token as a SLACK_ACCESS_TOKEN system variable. Currently, SlackLogsIntegration requires following permissions.
       ```admin, users:read, channels:read, teams:read, channels:history ```
 
   Please [refer Development](#Development) if you need help to create a Slack app.
