@@ -64,7 +64,7 @@ func transformaccessLogs(accessLogs []model.AccessLog, teamName string, lastTime
 	ts := time.Now().Unix()
 	for _, l := range accessLogs {
 		if l.DateLast < lastTimeStamp {
-			slog.Info("Successfully fetched accessLogs for the required interval")
+			slog.Debug("This access log entry is not within the requested interval")
 			// Access logs gets retrieved latest log first.
 			// Using date_last as the parameter to retrive logs in flushInterval
 			collectedLogs = true
@@ -136,6 +136,7 @@ func (al *accessLogsHandler) Collect(token string) error {
 			return err
 		}
 		if collectedLogs {
+			slog.Info("Successfully fetched accessLogs for the required interval")
 			break
 		}
 		// Check total collected logs size and maximum allowed logs size in a single request

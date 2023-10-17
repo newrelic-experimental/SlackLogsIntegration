@@ -28,6 +28,7 @@ func init() {
 	flag.StringVar(&logLevel, "logLevel", "info", "Golang slog log level: debug | info | warn | error")
 	flag.IntVar(&flushInterval, "flushInterval", 1440, "Flush interval in minutes")
 
+
 	flag.Parse()
 	if v, ok := os.LookupEnv("INGEST_KEY"); ok {
 		slog.Debug("IngestKey found in env", "key", v)
@@ -36,6 +37,10 @@ func init() {
 
 	if nrAccount == "" {
 		log.Fatalln("****  Please set INGEST_KEY. *****")
+	}
+
+	if !fetchChannelDetails && !fetchUserLogs && !fetchAccessLogs && !fetchConversationLogs {
+		log.Fatalln("Not received log types to fetch logs. Nothing to do.")
 	}
 
 	// Setup slog
