@@ -75,7 +75,7 @@ func (c *SlackClient) SendRequest(retryCallback RetryCallback, responseData inte
 
 	encodedParams := params.Encode()
 	slackUrl := fmt.Sprintf("%s?%s", c.SlackAPIURL, encodedParams)
-	slog.Debug("API request", "slackUrl", slackUrl, "slackToken", c.SlackToken)
+	slog.Debug("API request", "slackUrl", slackUrl)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
