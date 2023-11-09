@@ -41,10 +41,13 @@ type channelsListResponse struct {
 	ReqError string `json:"error"`
 }
 
-func getSlackChannelLogs(c *common.SlackClient) (channelsListResponse, error) {
+func getSlackChannelLogs(c *common.SlackClient, teamId string) (channelsListResponse, error) {
 	slackClient := common.NewSlackClient(c.SlackAPIURL, c.SlackToken, c.Cursor)
+	params := map[string]string{
+                "team_id": teamId,
+        }
 	var responseData channelsListResponse
-	errSlack := slackClient.SendRequest(common.WaitAndRetry, &responseData)
+	errSlack := slackClient.SendRequest(common.WaitAndRetry, &responseData, params)
 	if errSlack != nil {
 		return responseData, errSlack
 	}
@@ -83,34 +86,16 @@ func (cl *ChannelLogsHandler) ResetLogs() {
 	logCount = 0
 }
 
-func getTeamName() (string, error) {
-	slackClient := common.NewSlackClient(constants.SlackTeamInfoAPIURL, slackToken, "")
-	var responseData model.TeamInfoResponse
-	errSlack := slackClient.SendRequest(common.WaitAndRetry, &responseData)
-	if errSlack != nil {
-		return "", errSlack
-	}
-	if !responseData.Ok {
-                return "", fmt.Errorf("Slack API error %v", responseData.ReqError)
-        }
-	slog.Info("getTeamName", "teamName", responseData.TeamInfo.Name)
-	return responseData.TeamInfo.Name, nil
-}
-
-func (cl *ChannelLogsHandler) Collect(token string) error {
+func (cl *ChannelLogsHandler) Collect(token string, teamId string, teamName string) error {
 	slog.Info("Collecting channel deatils")
 	flushInterval := args.GetInterval()
 	nextCursor := ""
 	logCount = 0
 	slackToken = token
-	teamName, err := getTeamName()
-	if err != nil {
-		return nil
-	}
 	for {
 		c := common.NewSlackClient(constants.SlackChannelAPIURL, slackToken, nextCursor)
 		// Get Channel logs
-		response, err := getSlackChannelLogs(c)
+		response, err := getSlackChannelLogs(c, teamId)
 		if err != nil {
 			return err
 		}
@@ -138,26 +123,26 @@ func (cl *ChannelLogsHandler) Collect(token string) error {
 	return nil
 }
 
-func GetChannels(token string) ([]string, error) {
+func GetChannels(token string, teamId string) ([]string, error) {
         slog.Info("Collecting channel ids")
         nextCursor := ""
 	var channelList []string
-        for {
-                c := common.NewSlackClient(constants.SlackChannelAPIURL, token, nextCursor)
-                // Get Channel logs
-                response, err := getSlackChannelLogs(c)
-                if err != nil {
-                        return channelList, err
-                }
+	for {
+		c := common.NewSlackClient(constants.SlackChannelAPIURL, token, nextCursor)
+		// Get Channel logs
+		response, err := getSlackChannelLogs(c, teamId)
+		if err != nil {
+			return channelList, err
+		}
 		for _, l := range response.Channels {
 			channelList = append(channelList, l.ID)
 		}
-                next := response.ResponseMetaData.NextCursor
-                if next == "" {
-                        slog.Debug("Done with fetching all the channels, now iterate through the channels to get conversations")
-                        break
-                }
-                nextCursor = next
-        }
+		next := response.ResponseMetaData.NextCursor
+		if next == "" {
+			slog.Debug("Done with fetching all the channels, now iterate through the channels to get conversations")
+			break
+		}
+		nextCursor = next
+	}
 	return channelList, nil
 }

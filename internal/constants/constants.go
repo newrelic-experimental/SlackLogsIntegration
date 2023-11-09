@@ -9,4 +9,5 @@ const (
 	SlackChannelAPIURL  = "https://slack.com/api/conversations.list"
 	SlackChannelHistoryAPIURL  = "https://slack.com/api/conversations.history"
 	SlackChannelRepliesAPIURL  = "https://slack.com/api/conversations.replies"
+	SlackTeamsListAPIURL  = "https://slack.com/api/auth.teams.list"
 )

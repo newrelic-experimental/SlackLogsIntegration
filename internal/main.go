@@ -8,6 +8,7 @@ import (
 	"slackLogs/internal/channellogs"
 	"slackLogs/internal/accesslogs"
 	"slackLogs/internal/conversationlogs"
+	"slackLogs/internal/teamslist"
 
 	"os"
 	"log/slog"
@@ -27,10 +28,16 @@ func updateSlackToken() {
 
 func collectAndExportLogsToNR(c common.CollectLogs) {
 	for  {
-		err := c.Collect(slackToken)
+		teamsList, err := teamslist.GetSlackTeamList(slackToken)
 		if err != nil {
-			// Log the error
-			log.Fatalln("Received an error in collecting/exporting", err)
+			log.Fatalln("Not able to fetch tokens list with the provided token, err" , err)
+		}
+		for _,team := range teamsList {
+			err := c.Collect(slackToken, team.Id, team.Name)
+			if err != nil {
+				// Log the error
+				log.Fatalln("Received an error in collecting/exporting", err)
+			}
 		}
 	}
 }

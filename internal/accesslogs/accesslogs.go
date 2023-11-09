@@ -44,10 +44,11 @@ type teamAccessLogResponse struct {
 	Random            map[string]interface{} `json:"-"`
 }
 
-func getSlackaccessLogs(c *common.SlackClient, before int64) (teamAccessLogResponse, error) {
+func getSlackaccessLogs(c *common.SlackClient, before int64, teamId string) (teamAccessLogResponse, error) {
 	slackClient := common.NewSlackClient(c.SlackAPIURL, c.SlackToken, c.Cursor)
 	params := map[string]string{
                 "before": strconv.FormatInt(before, 10),
+		"team_id": teamId,
         }
 	var responseData teamAccessLogResponse
 	errSlack := slackClient.SendRequest(common.WaitAndRetry, &responseData, params)
@@ -95,38 +96,21 @@ func (al *accessLogsHandler) ResetLogs() {
         logCount = 0
 }
 
-func getTeamName() (string, error) {
-	slackClient := common.NewSlackClient(constants.SlackTeamInfoAPIURL, slackToken, "")
-	var responseData model.TeamInfoResponse
-	errSlack := slackClient.SendRequest(common.WaitAndRetry, &responseData)
-	if errSlack != nil {
-		return "", errSlack
-	}
-	if !responseData.Ok {
-                return "", fmt.Errorf("Slack API error %v", responseData.ReqError)
-        }
-	slog.Debug("getTeamName", "teamName" , responseData.TeamInfo.Name)
-	return responseData.TeamInfo.Name, nil
-}
-
-func (al *accessLogsHandler) Collect(token string) error {
+func (al *accessLogsHandler) Collect(token string, teamId string, teamName string) error {
 	slog.Info("Collecting access logs : enter")
 	flushInterval := args.GetInterval()
 	nextCursor := ""
 	logCount = 0
 	slackToken = token
-	teamName, err :=  getTeamName()
-	if err != nil  {
-		return err
-	}
 	currentTime := time.Now()
 	lastFetched := currentTime.Unix()
 	interval := time.Duration(flushInterval)
+	slog.Info("Collecting access logs", "for last", interval)
 	lastBeforeFetched := currentTime.Add(-(interval) * time.Minute).Unix()
 	for {
 		c := common.NewSlackClient(constants.SlackaccessAPIURL, token, nextCursor)
 		// Get access logs
-		response, err := getSlackaccessLogs(c, lastFetched)
+		response, err := getSlackaccessLogs(c, lastFetched, teamId)
 		if err != nil {
 			return err
 		}
