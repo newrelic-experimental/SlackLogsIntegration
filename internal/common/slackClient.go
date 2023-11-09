@@ -13,7 +13,7 @@ import (
 )
 
 type CollectLogs interface {
-	Collect(token string) error // A common method for collecting data.
+	Collect(token string, teamId string, teamName string) error // A common method for collecting data.
 	ResetLogs()  // A common method for cleanup
 }
 

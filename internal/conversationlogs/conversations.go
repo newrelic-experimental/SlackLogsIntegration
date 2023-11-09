@@ -133,22 +133,6 @@ func (cl *ConversationLogsHandler) ResetLogs() {
         logCount = 0
 }
 
-
-func getTeamName(token string) (string, error) {
-	slackClient := common.NewSlackClient(constants.SlackTeamInfoAPIURL, token, "")
-	var responseData model.TeamInfoResponse
-	errSlack := slackClient.SendRequest(common.WaitAndRetry, &responseData)
-	if errSlack != nil {
-		return "", errSlack
-	}
-	if !responseData.Ok {
-                return "", fmt.Errorf("Slack API error %v", responseData.ReqError)
-        }
-	slog.Debug("getTeamName", "teamName" , responseData.TeamInfo.Name)
-	return responseData.TeamInfo.Name, nil
-}
-
-
 func getReplies(timeStamp string, channelId string) ([]model.ConversationReply, error) {
 	nextCursor := ""
 	var repliesList []model.ConversationReply
@@ -187,20 +171,15 @@ func getReplies(timeStamp string, channelId string) ([]model.ConversationReply, 
 }
 
 
-func (cl *ConversationLogsHandler) Collect(token string) error {
+func (cl *ConversationLogsHandler) Collect(token string, teamId string, teamName string) error {
 	slog.Info("Collecting conversation logs")
 	flushInterval := args.GetInterval()
 	nextCursor := ""
 	logCount = 0
-	name, errTeamFetch := getTeamName(token)
-	if errTeamFetch != nil {
-		return errTeamFetch
-	}
-	channelList, err := channellogs.GetChannels(token)
+	channelList, err := channellogs.GetChannels(token, teamId)
 	if err != nil {
 		return err
 	}
-	teamName = name
 	slackToken = token
 	currentTime := time.Now()
         latestTimeStamp := currentTime.Unix()

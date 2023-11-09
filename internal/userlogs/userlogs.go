@@ -65,10 +65,13 @@ type BillableInfoResponse struct {
 }
 
 
-func getSlackUserLogs(c *common.SlackClient) (usersListResponse, error) {
+func getSlackUserLogs(c *common.SlackClient, teamId string) (usersListResponse, error) {
 	slackClient := common.NewSlackClient(c.SlackAPIURL, c.SlackToken, c.Cursor)
+	params := map[string]string{
+                "team_id": teamId,
+        }
 	var responseData usersListResponse
-	errSlack := slackClient.SendRequest(common.WaitAndRetry,&responseData)
+	errSlack := slackClient.SendRequest(common.WaitAndRetry, &responseData, params)
 	if errSlack != nil {
 		return responseData, errSlack
 	}
@@ -144,20 +147,16 @@ func getTeamName() (string, error) {
 	return responseData.TeamInfo.Name, nil
 }
 
-func (ul *UserLogsHandler) Collect(token string) error {
+func (ul *UserLogsHandler) Collect(token string, teamId string, teamName string) error {
 	slog.Info("Collecting user logs")
 	flushInterval := args.GetInterval()
 	nextCursor := ""
 	logCount = 0
 	slackToken = token
-	teamName, err :=  getTeamName()
-	if err != nil  {
-		return err
-	}
 	for {
 		c := common.NewSlackClient(constants.SlackUserAPIURL, slackToken, nextCursor)
 		// Get User logs
-		response, err := getSlackUserLogs(c)
+		response, err := getSlackUserLogs(c, teamId)
 		if err != nil {
 			return err
 		}
