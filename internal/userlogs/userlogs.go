@@ -171,14 +171,14 @@ func (ul *UserLogsHandler) Collect(token string, teamId string, teamName string)
 		}
 		next := response.ResponseMetaData.NextCursor
 		if next == "" {
-			slog.Info("There is no next page, Wait for the next polling cycle to get latest userLogs")
+			slog.Info("There is no next page, collected userLogs")
 			break
 		}
 		nextCursor = next
 	}
 	// Flush rest of the logs
 	ul.ResetLogs()
-	slog.Info("Collecting user logs : exit,  next iteration starts", "flushInterval", flushInterval)
+	slog.Info("Collecting user logs : exit,  next iteration starts", "flushInterval(in hours)", flushInterval)
         time.Sleep(time.Duration(flushInterval) * time.Minute)
 	return nil
 }

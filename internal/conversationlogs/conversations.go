@@ -214,7 +214,7 @@ func (cl *ConversationLogsHandler) Collect(token string, teamId string, teamName
 	}
 	// Flush rest of the logs
 	cl.ResetLogs()
-	slog.Info("Collecting conversation logs : exit,  next iteration starts", "flushInterval", flushInterval)
+	slog.Info("Collecting conversation logs : exit,  next iteration starts", "flushInterval(in hours)", flushInterval)
         time.Sleep(time.Duration(flushInterval) * time.Minute)
 	return nil
 }

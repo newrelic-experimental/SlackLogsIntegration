@@ -110,7 +110,7 @@ func (cl *ChannelLogsHandler) Collect(token string, teamId string, teamName stri
 		}
 		next := response.ResponseMetaData.NextCursor
 		if next == "" {
-			slog.Info("There is no next page, Wait for the next polling cycle to get latest channelDetails")
+			slog.Info("There is no next page, collected channels list. Sending logs to NR")
         		cl.ResetLogs()
 			break
 		}
@@ -118,7 +118,7 @@ func (cl *ChannelLogsHandler) Collect(token string, teamId string, teamName stri
 	}
 	// Flush rest of the logs
         cl.ResetLogs()
-	slog.Info("Collecting channel details : exit, next iteration starts", "flushInterval", flushInterval)
+	slog.Info("Collecting channel details : exit, next iteration starts", "flushInterval(in hours)", flushInterval)
         time.Sleep(time.Duration(flushInterval) * time.Minute)
 	return nil
 }
