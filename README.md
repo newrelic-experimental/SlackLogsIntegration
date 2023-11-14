@@ -7,10 +7,11 @@ Send following Slack API logs to New Relic's Log API. 🚧 This project is curre
 - [UserLogs](https://api.slack.com/methods/users.list)
 - [AccessLogs](https://api.slack.com/methods/team.accessLogs)
 - [ConversationLogs](https://api.slack.com/methods/conversations.history)
+- [AuditLogs](https://api.slack.com/admins/audit-logs) 
 
 ### Prerequisites
-- Install Slack app with required permissions and collect user token. Use this token as a SLACK_ACCESS_TOKEN system variable. Currently, SlackLogsIntegration requires following permissions.
-      ```admin, users:read, channels:read, teams:read, channels:history ```
+- Install Slack app with required permissions and collect user token. Use this token as a SLACK_ACCESS_TOKEN system variable. Currently, SlackLogsIntegration requires following permissions.<br>
+      ```admin, users:read, channels:read, teams:read, channels:history, auditlogs:read ```
 
   Please [refer Development](#Development) if you need help to create a Slack app.
 - Get New Relic ingest key. Use this key as a INGEST_KEY system variable.
@@ -69,11 +70,13 @@ Usage of /slackLogger:
 
 ## Troubleshooting
 - Please check whether Slack app has installed with proper permissions.
+- Audit logs can be collected only using organisation wide access token
 - Please refer FAQ[https://github.com/newrelic-experimental/SlackLogsIntegration/blob/update-readme/FAQ.txt]
 
 ## Development
 - [Create a new Slack APP](https://api.slack.com/start/quickstart)
 - [Slack App home page](https://api.slack.com/apps)
+- [Create a new Slack APP on Enterprise grid](https://api.slack.com/enterprise/grid)
 - [Slack access token authentication](https://api.slack.com/authentication/oauth-v2)
 - Verify token validay by triggering respective [API call](https://api.slack.com/methods/conversations.list/test)    
 
