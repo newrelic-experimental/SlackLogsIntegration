@@ -15,6 +15,7 @@ var (
 	fetchChannelDetails  bool
 	fetchUserLogs   bool
 	fetchConversationLogs   bool
+	fetchAuditlogs  bool
 	logLevel   string
 	flushInterval   int
 )
@@ -27,6 +28,7 @@ func init() {
 	flag.BoolVar(&fetchConversationLogs, "conversationLogs", false, "Fetch conversation logs")
 	flag.StringVar(&logLevel, "logLevel", "info", "Golang slog log level: debug | info | warn | error")
 	flag.IntVar(&flushInterval, "flushInterval", 1440, "Flush interval in minutes")
+	flag.BoolVar(&fetchAuditlogs, "auditlogs", false, "Fetch audit logs")
 
 
 	flag.Parse()
@@ -39,7 +41,7 @@ func init() {
 		log.Fatalln("****  Please set INGEST_KEY. *****")
 	}
 
-	if !fetchChannelDetails && !fetchUserLogs && !fetchAccessLogs && !fetchConversationLogs {
+	if !fetchChannelDetails && !fetchUserLogs && !fetchAccessLogs && !fetchConversationLogs && !fetchAuditlogs {
 		log.Fatalln("Not received log types to fetch logs. Nothing to do.")
 	}
 
@@ -92,4 +94,8 @@ func GetUserLogsEnabled() bool {
 
 func GetLogLevel() string {
 	return logLevel
+}
+
+func GetAuditLogsEnabled() bool {
+	return fetchAuditlogs
 }

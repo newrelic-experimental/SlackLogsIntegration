@@ -9,6 +9,7 @@ import (
 	"slackLogs/internal/accesslogs"
 	"slackLogs/internal/conversationlogs"
 	"slackLogs/internal/teamslist"
+	"slackLogs/internal/auditlogs"
 
 	"os"
 	"log/slog"
@@ -58,6 +59,9 @@ func main() {
 	}
 	if  args.GetConversationLogsnabled() {
 		go collectAndExportLogsToNR(conversationlogs.NewConversationLogsHandler(logClient))
+	}
+	if  args.GetAuditLogsEnabled() {
+		go collectAndExportLogsToNR(auditlogs.NewAuditLogsHandler(logClient))
 	}
 	// TODO: signal handling
 	select {}

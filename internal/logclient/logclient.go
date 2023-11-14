@@ -59,12 +59,14 @@ func NewLogClient() *LogClient {
 }
 
 func (c *LogClient) Flush(logtype string, logs []Logs) error {
+	slog.Debug("Flush: enter", "logtype", logtype)
 	// Ensure we have something to do
 	if len(logs) <= 0 {
+		slog.Info("There are no logs to send for the", "logtype", logtype)
 		// No data , no error
 		return nil
 	}
-	slog.Debug("Flush: enter")
+	logCount := len(logs)
 
 	ls := LogSet{
 		Common: &CommonAttr{
@@ -83,7 +85,8 @@ func (c *LogClient) Flush(logtype string, logs []Logs) error {
 	if err != nil {
 		return err
 	}
-	slog.Debug("Flush: exit")
+	slog.Info("Logs pushed to NR", "type", logtype, "count", logCount)
+	slog.Debug("Flush: exit", "logtype", logtype)
 	
 	return nil
 }
@@ -151,7 +154,7 @@ func (c *LogClient) ExportLogsToEndpoint(msg *LogSet) error {
 					slog.Info("There was an error when parsing the response from New Relic One: %v.", errJson)
 					return errJson
 				}
-				slog.Info("Pushed logs to NR", "NR Success", nr.Success, "Req Id",  nr.RequestId)
+				slog.Debug("Successfully pushed logs to NR", "Req Id",  nr.RequestId)
 			}
 		}
 	}

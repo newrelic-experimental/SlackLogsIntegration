@@ -107,7 +107,6 @@ func transformUserLogs(userLogs []model.User, teamName string) error {
 func (ul *UserLogsHandler) ResetLogs() {
 	if len(logs) > 0 {
 		ul.Client.Flush(logtype, logs)
-		slog.Info("Count of userLogs logs pushed to NR", "logCount", logCount)
 	}
 	logs = []logclient.Logs{}
 	totalLogsSize = 0
@@ -171,14 +170,14 @@ func (ul *UserLogsHandler) Collect(token string, teamId string, teamName string)
 		}
 		next := response.ResponseMetaData.NextCursor
 		if next == "" {
-			slog.Info("There is no next page, collected userLogs")
+			slog.Debug("There is no next page, collected userLogs")
 			break
 		}
 		nextCursor = next
 	}
 	// Flush rest of the logs
 	ul.ResetLogs()
-	slog.Info("Collecting user logs : exit,  next iteration starts", "flushInterval(in hours)", flushInterval)
+	slog.Info("Done", "Next user logs collection iteration starts(in minutes)", args.GetInterval())
         time.Sleep(time.Duration(flushInterval) * time.Minute)
 	return nil
 }

@@ -126,7 +126,6 @@ func transformConversationLogs(conversationLogs []model.Conversation, channelID 
 func (cl *ConversationLogsHandler) ResetLogs() {
 	if len(logs) > 0 {
 		cl.Client.Flush(logtype, logs)
-		slog.Info("Count of conversationLogs logs pushed to NR", "logCount", logCount)
 	}
 	logs = []logclient.Logs{}
 	totalLogsSize = 0
@@ -163,7 +162,7 @@ func getReplies(timeStamp string, channelId string) ([]model.ConversationReply, 
                 }
 		next := responseData.ResponseMetaData.NextCursor
 		if next == "" {
-                        slog.Debug("There is no next page, in getting replies")
+                        slog.Debug("There is no next page, collected conversations")
                         break
 		}
 	}
@@ -172,7 +171,6 @@ func getReplies(timeStamp string, channelId string) ([]model.ConversationReply, 
 
 
 func (cl *ConversationLogsHandler) Collect(token string, teamId string, teamName string) error {
-	slog.Info("Collecting conversation logs")
 	flushInterval := args.GetInterval()
 	nextCursor := ""
 	logCount = 0
@@ -186,6 +184,7 @@ func (cl *ConversationLogsHandler) Collect(token string, teamId string, teamName
 	interval := time.Duration(flushInterval)
 	// If flushInterval is 24 hours , it will fetch last 24hours conversations in the channel
         oldestTimeStamp := currentTime.Add(-(interval) * time.Minute).Unix()
+	slog.Info("Collecting conversational logs", "for last(in minutes)", interval)
 	for  _, channelId := range channelList {
 		for {
 			c := common.NewSlackClient(constants.SlackChannelHistoryAPIURL, token, nextCursor)
@@ -214,7 +213,7 @@ func (cl *ConversationLogsHandler) Collect(token string, teamId string, teamName
 	}
 	// Flush rest of the logs
 	cl.ResetLogs()
-	slog.Info("Collecting conversation logs : exit,  next iteration starts", "flushInterval(in hours)", flushInterval)
+	slog.Info("Done", "Next conversation logs collection iteration starts (in minutes)", flushInterval)
         time.Sleep(time.Duration(flushInterval) * time.Minute)
 	return nil
 }
