@@ -7,3 +7,6 @@
 3) Is there any database used in between?
    No. It retrives logs from the Slack API and forwards to New Relic.
 
+4) Is flush interval is global?
+   Yes. Flush interval is a global setting as of now for all the logtypes. 
+
