@@ -28,7 +28,7 @@ func init() {
 	flag.BoolVar(&fetchConversationLogs, "conversationLogs", false, "Fetch conversation logs")
 	flag.StringVar(&logLevel, "logLevel", "info", "Golang slog log level: debug | info | warn | error")
 	flag.IntVar(&flushInterval, "flushInterval", 1440, "Flush interval in minutes")
-	flag.BoolVar(&fetchAuditlogs, "auditlogs", false, "Fetch audit logs")
+	flag.BoolVar(&fetchAuditlogs, "auditLogs", false, "Fetch audit logs")
 
 
 	flag.Parse()
