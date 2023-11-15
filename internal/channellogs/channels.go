@@ -79,7 +79,6 @@ func transformChannelLogs(channelLogs []model.Channel, teamName string) error {
 func (cl *ChannelLogsHandler) ResetLogs() {
 	if len(logs) > 0 {
 		cl.Client.Flush(logtype, logs)
-		slog.Info("Count of channelDetail logs pushed to NR", "logCount", logCount)
 	}
 	logs = []logclient.Logs{}
 	totalLogsSize = 0
@@ -110,7 +109,7 @@ func (cl *ChannelLogsHandler) Collect(token string, teamId string, teamName stri
 		}
 		next := response.ResponseMetaData.NextCursor
 		if next == "" {
-			slog.Info("There is no next page, collected channels list. Sending logs to NR")
+			slog.Debug("There is no next page, collected channels list")
         		cl.ResetLogs()
 			break
 		}
@@ -118,7 +117,7 @@ func (cl *ChannelLogsHandler) Collect(token string, teamId string, teamName stri
 	}
 	// Flush rest of the logs
         cl.ResetLogs()
-	slog.Info("Collecting channel details : exit, next iteration starts", "flushInterval(in hours)", flushInterval)
+	slog.Info("Done", "Next channel collection iteration starts(in minutes)", args.GetInterval())
         time.Sleep(time.Duration(flushInterval) * time.Minute)
 	return nil
 }

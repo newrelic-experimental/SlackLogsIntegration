@@ -80,11 +80,13 @@ func (c *SlackClient) SendRequest(retryCallback RetryCallback, responseData inte
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(ctx, "GET", slackUrl, nil)
+	req.Header.Set("Accept", "application/json")
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("Authorization", "Bearer "+c.SlackToken)
+	
 	response, errClient := HttpClient.Do(req)
 	if errClient != nil {
 		return errClient

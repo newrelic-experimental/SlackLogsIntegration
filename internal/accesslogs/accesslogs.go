@@ -89,7 +89,6 @@ func transformaccessLogs(accessLogs []model.AccessLog, teamName string, lastTime
 func (al *accessLogsHandler) ResetLogs() {
 	if len(logs) > 0 {
 		al.Client.Flush(logtype, logs)
-		slog.Info("Count of accessLogs logs pushed to NR", "logCount", logCount)
 	}
 	logs = []logclient.Logs{}
 	totalLogsSize = 0
@@ -104,7 +103,7 @@ func (al *accessLogsHandler) Collect(token string, teamId string, teamName strin
 	currentTime := time.Now()
 	lastFetched := currentTime.Unix()
 	interval := time.Duration(flushInterval)
-	slog.Info("Collecting access logs", "for last(in hours)", interval)
+	slog.Info("Collecting access logs", "for last(in minutes)", interval)
 	lastBeforeFetched := currentTime.Add(-(interval) * time.Minute).Unix()
 	for {
 		c := common.NewSlackClient(constants.SlackaccessAPIURL, token, nextCursor)
@@ -128,14 +127,14 @@ func (al *accessLogsHandler) Collect(token string, teamId string, teamName strin
 		}
 		next := response.ResponseMetaData.NextCursor
 		if next == "" {
-			slog.Info("There is no next page, Wait for the next polling cycle to get latest accessLogs")
+			slog.Info("There is no next page, collected accessLogs")
 			break
 		}
 		nextCursor = next
 	}
 	// Flush rest of the logs
 	al.ResetLogs()
-	slog.Info("Collecting access logs : exit, next iteration starts", "flushInterval(in hours)", flushInterval)
+	slog.Info("Done", "Next access logs collection iteration starts (in minutes)", flushInterval)
         time.Sleep(time.Duration(flushInterval) * time.Minute)
 	return nil
 }
