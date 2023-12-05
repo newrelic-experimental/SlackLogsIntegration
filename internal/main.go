@@ -18,6 +18,7 @@ import (
 
 var logClient *logclient.LogClient
 var slackToken string
+var teamsInfo = make(map[string]string)
 
 func updateSlackToken() {
         val, ok := os.LookupEnv("SLACK_ACCESS_TOKEN")
@@ -29,13 +30,8 @@ func updateSlackToken() {
 
 func collectAndExportLogsToNR(c common.CollectLogs) {
 	for  {
-		teamsList, err := teamslist.GetSlackTeamList(slackToken)
-		if err != nil {
-			log.Fatalln("Not able to fetch teams list with the provided token, err" , err)
-		}
-		slog.Info("List of workspaces your org-wide app has been access ", "teamsList", teamsList)
-		for _,team := range teamsList {
-			err := c.Collect(slackToken, team.Id, team.Name)
+		for id, name := range teamsInfo {
+			err := c.Collect(slackToken, id, name)
 			if err != nil {
 				// Log the error
 				log.Fatalln("Received an error in collecting/exporting", err)
@@ -48,7 +44,20 @@ func main() {
 	updateSlackToken()
 	logClient = logclient.NewLogClient()
 
-	slog.Info("Starting Slack API logs collection")
+	// Collect team information
+	teamsList, err := teamslist.GetSlackTeamList(slackToken)
+        if err != nil {
+		log.Fatalln("Not able to fetch teams list with the provided token, err" , err)
+        }
+	if len(teamsList) > 0 {
+		for _, team := range teamsList {
+			teamsInfo[team.Id] = team.Name
+		}
+	} else {
+		teamInfo, _ := teamslist.GetSlackTeamInfo(slackToken)
+		teamsInfo[teamInfo.Id] = teamInfo.Name
+	}
+	slog.Info("Starting Slack API logs collection for", "teamsInfo", teamsInfo)
 	if args.GetUserLogsEnabled() {
 		slog.Info("UserLogs enabled: Initiating Slack API logs collection for UserLogs")
 		go collectAndExportLogsToNR(userlogs.NewUserLogsHandler(logClient))
