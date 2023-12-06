@@ -37,6 +37,7 @@ type Channel struct {
 type Conversation struct {
 	Type             string            `json:"type"`
 	ChannelID        string
+	ChannelName      string
 	TeamName         string            `json:"team"`
 	AppID            string            `json:"app_id"`
 	Text             string            `json:"text"`
@@ -93,4 +94,3 @@ type AccessLog struct {
 	TeamName   string     `json:"team_name"`
         Random     map[string]interface{} `json:"-"`
 }
-

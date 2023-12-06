@@ -71,6 +71,7 @@ func transformaccessLogs(accessLogs []model.AccessLog, teamName string, lastTime
 			collectedLogs = true
 		 	continue  // Continue this loop and check other logs in this current access log list
 		}
+		l.TeamName = teamName
 		data, errJson := json.Marshal(l)
 		totalLogsSize = totalLogsSize + len(data)
 		if errJson != nil {
