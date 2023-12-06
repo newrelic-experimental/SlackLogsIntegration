@@ -122,19 +122,19 @@ func (cl *ChannelLogsHandler) Collect(token string, teamId string, teamName stri
 	return nil
 }
 
-func GetChannels(token string, teamId string) ([]string, error) {
+func GetChannels(token string, teamId string) (map[string]string, error) {
         slog.Info("Collecting channel ids")
         nextCursor := ""
-	var channelList []string
+	var channelsInfo = make(map[string]string)
 	for {
 		c := common.NewSlackClient(constants.SlackChannelAPIURL, token, nextCursor)
 		// Get Channel logs
 		response, err := getSlackChannelLogs(c, teamId)
 		if err != nil {
-			return channelList, err
+			return channelsInfo, err
 		}
 		for _, l := range response.Channels {
-			channelList = append(channelList, l.ID)
+			channelsInfo[l.ID] = l.Name
 		}
 		next := response.ResponseMetaData.NextCursor
 		if next == "" {
@@ -143,5 +143,5 @@ func GetChannels(token string, teamId string) ([]string, error) {
 		}
 		nextCursor = next
 	}
-	return channelList, nil
+	return channelsInfo, nil
 }

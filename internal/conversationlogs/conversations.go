@@ -6,7 +6,7 @@ import (
 	"time"
 	"fmt"
 	"strconv"
-	
+
 	"slackLogs/internal/args"
 	"slackLogs/internal/common"
 	"slackLogs/internal/logclient"
@@ -70,9 +70,9 @@ type TeamInfoResponse struct {
 type replyParams struct {
 	TimeStamp int64
 	Channel   string
-	Token     string  
+	Token     string
 	Latest    int64
-	Oldest    int64 
+	Oldest    int64
 	Client    *common.SlackClient
 }
 
@@ -96,11 +96,11 @@ func getSlackConversationLogs(c *common.SlackClient, channelId string, oldest in
 	return responseData, nil
 }
 
-func transformConversationLogs(conversationLogs []model.Conversation, channelID string) error {
+func transformConversationLogs(conversationLogs []model.Conversation, channelID string, channelName string) error {
 	ts := time.Now().Unix()
 	for _, l := range conversationLogs {
 		if l.ReplyCount >= 1 {
-			repliesList, err := getReplies(l.TimeStamp, channelID)	
+			repliesList, err := getReplies(l.TimeStamp, channelID)
 			if err != nil {
 				return fmt.Errorf("Error while getting replies for channel %s -  %v", channelID, err)
 			}
@@ -108,6 +108,7 @@ func transformConversationLogs(conversationLogs []model.Conversation, channelID 
 		}
 		l.TeamName = teamName
 		l.ChannelID = channelID
+		l.ChannelName = channelName
 		data, errJson := json.Marshal(l)
 		totalLogsSize = totalLogsSize + len(data)
 		if errJson != nil {
@@ -143,11 +144,11 @@ func getReplies(timeStamp string, channelId string) ([]model.ConversationReply, 
                            "limit": strconv.Itoa(200),
                            "ts": ts,
                 }
-		var responseData conversationsReplyResponse 
+		var responseData conversationsReplyResponse
         	errSlack := slackClient.SendRequest(common.WaitAndRetry, &responseData, params)
         	if errSlack != nil {
                 	return repliesList, errSlack
-       		}			
+		}
         	if !responseData.Ok {
                 	return repliesList, fmt.Errorf("Slack API error %v", responseData.ReqError)
         	}
@@ -170,14 +171,15 @@ func getReplies(timeStamp string, channelId string) ([]model.ConversationReply, 
 }
 
 
-func (cl *ConversationLogsHandler) Collect(token string, teamId string, teamName string) error {
+func (cl *ConversationLogsHandler) Collect(token string, tId string, tName string) error {
 	flushInterval := args.GetInterval()
 	nextCursor := ""
 	logCount = 0
-	channelList, err := channellogs.GetChannels(token, teamId)
+	channelList, err := channellogs.GetChannels(token, tId)
 	if err != nil {
 		return err
 	}
+	teamName = tName
 	slackToken = token
 	currentTime := time.Now()
         latestTimeStamp := currentTime.Unix()
@@ -185,7 +187,7 @@ func (cl *ConversationLogsHandler) Collect(token string, teamId string, teamName
 	// If flushInterval is 24 hours , it will fetch last 24hours conversations in the channel
         oldestTimeStamp := currentTime.Add(-(interval) * time.Minute).Unix()
 	slog.Info("Collecting conversational logs", "for last(in minutes)", interval)
-	for  _, channelId := range channelList {
+	for  channelId, channelName := range channelList {
 		for {
 			c := common.NewSlackClient(constants.SlackChannelHistoryAPIURL, token, nextCursor)
 			// Get Conversation logs
@@ -194,7 +196,7 @@ func (cl *ConversationLogsHandler) Collect(token string, teamId string, teamName
 				return err
 			}
 			// Filter required fields and add timestamp to each log
-			err = transformConversationLogs(response.ConversationsList, channelId)
+			err = transformConversationLogs(response.ConversationsList, channelId, channelName)
 			if err != nil {
 				return err
 			}
