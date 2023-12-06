@@ -100,8 +100,10 @@ func (c *SlackClient) SendRequest(retryCallback RetryCallback, responseData inte
 		}
 		return c.SendRequest(retryCallback, responseData)
 	}
-
-	if response.StatusCode >= 300 {
+	if response.StatusCode == 401 {
+		slog.Debug("Insufficient permissions to access", "slackUrl", slackUrl)
+		return fmt.Errorf("HTTP error %v", response.StatusCode)
+	} else if response.StatusCode >= 300 {
 		return fmt.Errorf("HTTP error %v", response.StatusCode)
 	}
 	defer response.Body.Close()
