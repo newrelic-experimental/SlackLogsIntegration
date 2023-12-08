@@ -85,10 +85,11 @@ func transformUserLogs(userLogs []model.User, teamName string) error {
 	ts := time.Now().Unix()
 	for _, l := range userLogs {
 		l.TeamName = teamName
-		status, err := getBillableInfo(l.UserID)
+		// TODO: Disabling this call as a fix for "not_allowed_token_type" error message
+		/*status, err := getBillableInfo(l.UserID)
 		if err != nil {
 			l.Billable = status
-		}
+		}*/
 		data, errJson := json.Marshal(l)
 		totalLogsSize = totalLogsSize + len(data)
 		if errJson != nil {
