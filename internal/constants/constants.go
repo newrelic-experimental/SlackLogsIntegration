@@ -1,7 +1,7 @@
 package constants
 
 const (
-        MaxAllowed    = 1000  // 1MB
+        MaxAllowed    = 10000  // 1MB
 	SlackUserAPIURL = "https://slack.com/api/users.list"
         SlackTeamInfoAPIURL = "https://slack.com/api/team.info"
         SlackBillingInfoAPIURL = "https://slack.com/api/team.billableInfo"
