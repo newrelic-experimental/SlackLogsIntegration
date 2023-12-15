@@ -24,6 +24,7 @@ var (
 var logs = []logclient.Logs{}
 var slackToken string
 var teamName string
+var channelsInfo = make(map[string]string)
 
 type ConversationLogsHandler struct {
 	Client *logclient.LogClient
@@ -175,9 +176,12 @@ func (cl *ConversationLogsHandler) Collect(token string, tId string, tName strin
 	flushInterval := args.GetInterval()
 	nextCursor := ""
 	logCount = 0
-	channelList, err := channellogs.GetChannels(token, tId)
-	if err != nil {
-		return err
+	if channelsInfo == nil {
+		chList, err := channellogs.GetChannels(token, tId)
+		if err != nil {
+			return err
+		}
+		channelsInfo = chList
 	}
 	teamName = tName
 	slackToken = token
@@ -187,7 +191,7 @@ func (cl *ConversationLogsHandler) Collect(token string, tId string, tName strin
 	// If flushInterval is 24 hours , it will fetch last 24hours conversations in the channel
         oldestTimeStamp := currentTime.Add(-(interval) * time.Minute).Unix()
 	slog.Info("Collecting conversational logs", "for last(in minutes)", interval)
-	for  channelId, channelName := range channelList {
+	for  channelId, channelName := range channelsInfo {
 		for {
 			c := common.NewSlackClient(constants.SlackChannelHistoryAPIURL, token, nextCursor)
 			// Get Conversation logs
@@ -216,6 +220,5 @@ func (cl *ConversationLogsHandler) Collect(token string, tId string, tName strin
 	// Flush rest of the logs
 	cl.ResetLogs()
 	slog.Info("Done", "Next conversation logs collection iteration starts (in minutes)", flushInterval)
-        time.Sleep(time.Duration(flushInterval) * time.Minute)
 	return nil
 }
