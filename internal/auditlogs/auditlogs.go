@@ -174,7 +174,7 @@ func (ah *auditLogsHandler) processLogType(entity string, data logclient.Logs, s
 func getTimeRange() (int64, int64){
         currentTime := time.Now()
         lastFetched := currentTime.Unix()
-	flushInterval := args.GetInterval()
+	flushInterval := args.GetAuditLogsPollingInterval()
         interval := time.Duration(flushInterval)
         slog.Info("Collecting audit logs", "for last(in minutes)", interval)
         lastBeforeFetched := currentTime.Add(-(interval) * time.Minute).Unix()
@@ -208,7 +208,5 @@ func (al *auditLogsHandler) Collect(token string, teamId string, teamName string
 	// Flush rest of the logs
 	reset = true
 	al.ResetLogs()
-	slog.Info("Done", "Next audit logs collection iteration starts(in minutes)", args.GetInterval())
-        time.Sleep(time.Duration(args.GetInterval()) * time.Minute)
 	return nil
 }

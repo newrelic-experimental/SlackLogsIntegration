@@ -97,7 +97,7 @@ func (al *accessLogsHandler) ResetLogs() {
 }
 
 func (al *accessLogsHandler) Collect(token string, teamId string, teamName string) error {
-	flushInterval := args.GetInterval()
+	flushInterval := args.GetAccessLogsPollingInterval()
 	nextCursor := ""
 	logCount = 0
 	slackToken = token
@@ -135,7 +135,5 @@ func (al *accessLogsHandler) Collect(token string, teamId string, teamName strin
 	}
 	// Flush rest of the logs
 	al.ResetLogs()
-	slog.Info("Done", "Next access logs collection iteration starts (in minutes)", flushInterval)
-        time.Sleep(time.Duration(flushInterval) * time.Minute)
 	return nil
 }

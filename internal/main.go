@@ -11,6 +11,7 @@ import (
 	"slackLogs/internal/teamslist"
 	"slackLogs/internal/auditlogs"
 
+	"sync"
 	"time"
 	"os"
 	"log/slog"
@@ -29,14 +30,35 @@ func updateSlackToken() {
 	slackToken = val
 }
 
-func collectAndExportLogsToNR(c common.CollectLogs) {
-		for id, name := range teamsInfo {
-			err := c.Collect(slackToken, id, name)
-			if err != nil {
-				// Log the error
-				log.Fatalln("Received an error in collecting/exporting", err)
-			}
+func collectAndExportLogsToNR(c common.CollectLogs,  wg *sync.WaitGroup, logType string, iteration int) {
+	defer wg.Done()
+	for id, name := range teamsInfo {
+		err := c.Collect(slackToken, id, name)
+		if err != nil {
+			// Log the error
+			log.Fatalln("Received an error in collecting/exporting", err)
 		}
+	}
+	slog.Info("Done, Collected logs", "logType", logType, "iteration", iteration)
+
+}
+
+func CollectLogs(interval time.Duration, c common.CollectLogs, logType string) {
+	var wg sync.WaitGroup
+	iteration := 1
+	slog.Info("Initiating new polling iteration for", "logType", logType)
+	wg.Add(1)
+	go collectAndExportLogsToNR(c, &wg, logType, iteration)
+	for {
+		select {
+		case <-time.After(interval):
+			iteration++
+			slog.Info("Starting polling iteration for", "logType", logType, "iteration", iteration)
+			wg.Add(1)
+			go collectAndExportLogsToNR(c, &wg, logType, iteration)
+		}
+	}
+	wg.Wait()
 }
 
 func main() {
@@ -57,36 +79,36 @@ func main() {
 		teamsInfo[teamInfo.Id] = teamInfo.Name
 	}
 	slog.Info("Starting Slack API logs collection for", "teamsInfo", teamsInfo)
-	flushInterval := args.GetInterval()
-	for {
-		if args.GetUserLogsEnabled() {
-			slog.Info("UserLogs enabled: Initiating Slack API logs collection for UserLogs")
-			go collectAndExportLogsToNR(userlogs.NewUserLogsHandler(logClient))
-			time.Sleep(time.Duration(flushInterval) * time.Minute)
-		}
-		if args.GetChannelDetailsEnabled() {
-			slog.Info("ChannelDetails enabled: Initiating Slack API logs collection for ChannelDetails")
-			go collectAndExportLogsToNR(channellogs.NewChannelLogsHandler(logClient))
-			time.Sleep(time.Duration(flushInterval) * time.Minute)
-		}
-		if  args.GetAccessLogsEnabled() {
-			slog.Info("AccessLogs enabled: Initiating Slack API logs collection for AccessLogs")
-			go collectAndExportLogsToNR(accesslogs.NewAccessLogsHandler(logClient))
-			time.Sleep(time.Duration(flushInterval) * time.Minute)
-		}
-		if  args.GetConversationLogsnabled() {
-			slog.Info("ConversationLogs enabled: Initiating Slack API logs collection for ConversationLogs")
-			go collectAndExportLogsToNR(conversationlogs.NewConversationLogsHandler(logClient))
-			time.Sleep(time.Duration(flushInterval) * time.Minute)
-		}
-		if  args.GetAuditLogsEnabled() {
-			slog.Info("AuditLogs enabled: Initiating Slack API logs collection for AuditLogs")
-			go collectAndExportLogsToNR(auditlogs.NewAuditLogsHandler(logClient))
-			time.Sleep(time.Duration(flushInterval) * time.Minute)
-		}
-	}
-	// TODO: signal handling
-	//select {}
 
+	if args.GetUserLogsEnabled() {
+		slog.Info("UserLogs enabled: Initiating Slack API logs collection for UserLogs")
+		interval := args.GetUserLogsPollingInterval()
+		go CollectLogs(interval, userlogs.NewUserLogsHandler(logClient), "UserLogs")
+	}
+
+	if args.GetChannelDetailsEnabled() {
+		slog.Info("ChannelDetails enabled: Initiating Slack API logs collection for ChannelDetails")
+		interval := args.GetChannelDetailsPollingInterval()
+		go CollectLogs(interval, channellogs.NewChannelLogsHandler(logClient), "ChannelDetails")
+	}
+
+	if  args.GetAccessLogsEnabled() {
+		slog.Info("AccessLogs enabled: Initiating Slack API logs collection for AccessLogs")
+		interval := args.GetAccessLogsPollingInterval()
+		go CollectLogs(interval, accesslogs.NewAccessLogsHandler(logClient), "AccessLogs")
+	}
+
+	if  args.GetAuditLogsEnabled() {
+		slog.Info("AuditLogs enabled: Initiating Slack API logs collection for AuditLogs")
+		interval := args.GetAuditLogsPollingInterval()
+		go CollectLogs(interval, auditlogs.NewAuditLogsHandler(logClient), "AuditLogs")
+	}
+
+	if  args.GetConversationLogsEnabled() {
+		slog.Info("ConversationLogs enabled: Initiating Slack API logs collection for ConversationLogs")
+		interval := args.GetConversationLogsPollingInterval()
+		go CollectLogs(interval, conversationlogs.NewConversationLogsHandler(logClient), "ConversationLogs")
+	}
+	select {}
 	slog.Info("Exiting Slack API logs collection")
 }

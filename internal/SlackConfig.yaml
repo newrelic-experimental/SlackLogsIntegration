@@ -1,0 +1,24 @@
+global:
+  flushLogSize: 1MB
+  logAPIEndPoint: https://log-api.newrelic.com/log/v1
+  logLevl: debug
+
+conversationLogs:
+  enabled: False 
+  pollingInterval: 10m
+
+channelDetails:
+  enabled: True 
+  pollingInterval: 15m
+
+userLogs:
+  enabled: True 
+  pollingInterval: 10m
+
+accessLogs:
+  enabled: False
+  pollingInterval: 5m
+
+auditLogs:
+  enabled: False
+  pollingInterval: 10m

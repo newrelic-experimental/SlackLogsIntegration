@@ -1,11 +1,16 @@
 package args
 
 import (
-	"flag"
 	"log/slog"
 	"log"
 	"os"
 	"strings"
+	"regexp"
+	"strconv"
+	"fmt"
+	"time"
+	"io/ioutil"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -15,34 +20,155 @@ var (
 	fetchChannelDetails  bool
 	fetchUserLogs   bool
 	fetchConversationLogs   bool
-	fetchAuditlogs  bool
+	fetchAuditLogs  bool
+	auditLogsPollingInterval time.Duration
+	conversationLogsPollingInterval time.Duration
+	channelDetailsPollingInterval time.Duration
+	userLogsPollingInterval time.Duration
+	accessLogsPollingInterval time.Duration
 	logLevel   string
-	flushInterval   int
+	flushLogSize   int64
 )
 
+// Config struct to match the structure of the YAML file
+type Config struct {
+        Global             GlobalConfig          `yaml:"global"`
+        ConversationLogs   LogsAttributes        `yaml:"conversationLogs"`
+        ChannelDetails     LogsAttributes        `yaml:"channelDetails"`
+        UserLogs           LogsAttributes        `yaml:"userLogs"`
+        AccessLogs         LogsAttributes        `yaml:"accessLogs"`
+        AuditLogs          LogsAttributes        `yaml:"auditLogs"`
+}
+
+type LogsAttributes struct {
+        PollingInterval    string  `yaml:"pollingInterval"`
+        Enabled            bool    `yaml:"enabled"`
+}
+
+type GlobalConfig struct {
+        FlushLogSize     string  `yaml:"flushLogSize"`
+        LogLevel         string  `yaml:"logLevel"`
+	LogApiEndpoint   string  `yaml:"logAPIEndPoint"` 
+}
+
+func parseSize(sizeStr string) (int64, error) {
+        re := regexp.MustCompile(`^(\d+)\s*([BKMGbkmg])?B?$`)
+
+        matches := re.FindStringSubmatch(strings.ToUpper(sizeStr))
+        if matches == nil {
+                return 0, fmt.Errorf("invalid size format: %s", sizeStr)
+        }
+
+        value, err := strconv.ParseInt(matches[1], 10, 64)
+        if err != nil {
+                return 0, fmt.Errorf("error parsing size value: %v", err)
+        }
+
+        unit := matches[2]
+        switch unit {
+        case "B", "":
+                // Bytes, no conversion needed
+        case "K":
+                value *= 1024
+        case "M":
+                value *= 1024 * 1024
+        case "G":
+                value *= 1024 * 1024 * 1024
+        default:
+                return 0, fmt.Errorf("unsupported size unit: %s", unit)
+        }
+        return value, nil
+}
+
+func parseDuration(durationStr string) (time.Duration, error) {
+	re := regexp.MustCompile(`^(\d+)([hms]+)$`)
+
+	matches := re.FindStringSubmatch(strings.ToLower(durationStr))
+	if matches == nil {
+		return 0, fmt.Errorf("invalid duration format: %s", durationStr)
+	}
+
+	value, err := strconv.Atoi(matches[1])
+	if err != nil {
+		return 0, fmt.Errorf("error parsing duration value: %v", err)
+	}
+
+	unit := matches[2]
+	switch unit {
+	case "h":
+		return time.Duration(value) * time.Hour, nil
+	case "m":
+		return time.Duration(value) * time.Minute, nil
+	case "s":
+		return time.Duration(value) * time.Second, nil
+	default:
+		return 0, fmt.Errorf("unsupported duration unit: %s", unit)
+	}
+}
+
 func init() {
-	flag.StringVar(&nrUrlLog, "logApiEndpoint", "https://log-api.newrelic.com/log/v1", "New Relic log endpoint")
-	flag.BoolVar(&fetchChannelDetails, "channelDetails", false, "Fetch channel details")
-	flag.BoolVar(&fetchUserLogs, "userLogs", false, "Fetch user logs")
-	flag.BoolVar(&fetchAccessLogs, "accessLogs", false, "Fetch access logs")
-	flag.BoolVar(&fetchConversationLogs, "conversationLogs", false, "Fetch conversation logs")
-	flag.StringVar(&logLevel, "logLevel", "info", "Golang slog log level: debug | info | warn | error")
-	flag.IntVar(&flushInterval, "flushInterval", 1440, "Flush interval in minutes")
-	flag.BoolVar(&fetchAuditlogs, "auditLogs", false, "Fetch audit logs")
-
-
-	flag.Parse()
-	if v, ok := os.LookupEnv("INGEST_KEY"); ok {
-		slog.Debug("IngestKey found in env", "key", v)
-		nrAccount = v
+	if k, ok := os.LookupEnv("INGEST_KEY"); ok {
+		slog.Debug("IngestKey found in env", "key", k)
+		nrAccount = k
 	}
 
 	if nrAccount == "" {
 		log.Fatalln("****  Please set INGEST_KEY. *****")
 	}
 
-	if !fetchChannelDetails && !fetchUserLogs && !fetchAccessLogs && !fetchConversationLogs && !fetchAuditlogs {
-		log.Fatalln("Not received log types to fetch logs. Nothing to do.")
+
+	// Specify the path to YAML config file
+        configFilePath := "SlackConfig.yaml"
+
+        // Read the YAML file
+        yamlFile, err := ioutil.ReadFile(configFilePath)
+        if err != nil {
+                log.Fatalf("Error reading YAML file: %v", err)
+        }
+
+        // Parse YAML content into a Config struct
+        var config Config
+        err = yaml.Unmarshal(yamlFile, &config)
+        if err != nil {
+                log.Fatalf("Error unmarshalling YAML content: %v", err)
+        }
+
+	flushLogSize, err = parseSize(config.Global.FlushLogSize)
+        if err != nil {
+                log.Fatalf("Error parsing MaxSize: %v", err)
+        }
+
+        nrUrlLog = config.Global.LogApiEndpoint
+        logLevel = config.Global.LogLevel
+	fetchAccessLogs = config.AccessLogs.Enabled
+	accessLogsPollingInterval, err = parseDuration(config.AccessLogs.PollingInterval)
+	if err != nil {
+		log.Fatalf("Error: %v, Please provide allowed pollingInterval for AccessLogs %v", err, config.AccessLogs.PollingInterval)
+		return
+	}
+	fetchUserLogs = config.UserLogs.Enabled
+	userLogsPollingInterval, err = parseDuration(config.UserLogs.PollingInterval)
+	if err != nil {
+		log.Fatalf("Error: %v, Please provide allowed pollingInterval for UserLogs", config.UserLogs.PollingInterval)
+		return
+	}
+	fetchConversationLogs = config.ConversationLogs.Enabled
+	conversationLogsPollingInterval, err = parseDuration(config.ConversationLogs.PollingInterval)
+	if err != nil {
+		log.Fatalf("Error: %v, Please provide allowed pollingInterval for ConversationLogs", config.ConversationLogs.PollingInterval)
+		return
+	}
+	fetchChannelDetails = config.ChannelDetails.Enabled
+	channelDetailsPollingInterval, err = parseDuration(config.ChannelDetails.PollingInterval)
+	if err != nil {
+		log.Fatalf("Error: %v, Please provide allowed pollingInterval for ChannelDetails", config.AccessLogs.PollingInterval)
+		return
+	}
+	fetchAuditLogs = config.AuditLogs.Enabled
+	auditLogsPollingInterval, err = parseDuration(config.AuditLogs.PollingInterval)
+	if err != nil {
+		log.Fatalf("Error: %v, Please provide allowed pollingInterval for AuditLogs", config.AuditLogs.PollingInterval)
+		return
 	}
 
 	// Setup slog
@@ -72,10 +198,6 @@ func GetNRLogEndpoint() string {
 	return nrUrlLog
 }
 
-func GetInterval() int {
-	return flushInterval
-}
-
 func GetAccessLogsEnabled() bool {
 	return fetchAccessLogs
 }
@@ -84,7 +206,7 @@ func GetChannelDetailsEnabled() bool {
 	return fetchChannelDetails
 }
 
-func GetConversationLogsnabled() bool {
+func GetConversationLogsEnabled() bool {
 	return fetchConversationLogs
 }
 
@@ -96,6 +218,30 @@ func GetLogLevel() string {
 	return logLevel
 }
 
+func GetFlushLogSize() int64 {
+	return flushLogSize
+}
+
 func GetAuditLogsEnabled() bool {
-	return fetchAuditlogs
+	return fetchAuditLogs
+}
+
+func GetAuditLogsPollingInterval() time.Duration {
+	return auditLogsPollingInterval
+}
+
+func GetUserLogsPollingInterval() time.Duration {
+	return userLogsPollingInterval
+}
+
+func GetAccessLogsPollingInterval() time.Duration {
+	return accessLogsPollingInterval
+}
+
+func GetConversationLogsPollingInterval() time.Duration {
+	return conversationLogsPollingInterval
+}
+
+func GetChannelDetailsPollingInterval() time.Duration {
+	return channelDetailsPollingInterval
 }

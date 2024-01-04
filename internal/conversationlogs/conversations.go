@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"slackLogs/internal/args"
 	"slackLogs/internal/common"
+	"slackLogs/internal/args"
 	"slackLogs/internal/logclient"
 	"slackLogs/internal/model"
 	"slackLogs/internal/constants"
@@ -173,7 +173,7 @@ func getReplies(timeStamp string, channelId string) ([]model.ConversationReply, 
 
 
 func (cl *ConversationLogsHandler) Collect(token string, tId string, tName string) error {
-	flushInterval := args.GetInterval()
+	flushInterval := args.GetConversationLogsPollingInterval()
 	nextCursor := ""
 	logCount = 0
 	if channelsInfo == nil {
@@ -219,6 +219,5 @@ func (cl *ConversationLogsHandler) Collect(token string, tId string, tName strin
 	}
 	// Flush rest of the logs
 	cl.ResetLogs()
-	slog.Info("Done", "Next conversation logs collection iteration starts (in minutes)", flushInterval)
 	return nil
 }

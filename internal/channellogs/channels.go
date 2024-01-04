@@ -6,7 +6,6 @@ import (
 	"time"
 	"fmt"
 
-	"slackLogs/internal/args"
 	"slackLogs/internal/common"
 	"slackLogs/internal/logclient"
 	"slackLogs/internal/model"
@@ -87,7 +86,6 @@ func (cl *ChannelLogsHandler) ResetLogs() {
 
 func (cl *ChannelLogsHandler) Collect(token string, teamId string, teamName string) error {
 	slog.Info("Collecting channel deatils")
-	flushInterval := args.GetInterval()
 	nextCursor := ""
 	logCount = 0
 	slackToken = token
@@ -117,8 +115,6 @@ func (cl *ChannelLogsHandler) Collect(token string, teamId string, teamName stri
 	}
 	// Flush rest of the logs
         cl.ResetLogs()
-	slog.Info("Done", "Next channel collection iteration starts(in minutes)", args.GetInterval())
-        time.Sleep(time.Duration(flushInterval) * time.Minute)
 	return nil
 }
 
