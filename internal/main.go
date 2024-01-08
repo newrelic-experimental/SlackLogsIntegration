@@ -21,6 +21,7 @@ import (
 var logClient *logclient.LogClient
 var slackToken string
 var teamsInfo = make(map[string]string)
+var defaultChannelLogsInterval = 24 * time.Hour
 
 func updateSlackToken() {
         val, ok := os.LookupEnv("SLACK_ACCESS_TOKEN")
@@ -36,7 +37,7 @@ func collectAndExportLogsToNR(c common.CollectLogs,  wg *sync.WaitGroup, logType
 		err := c.Collect(slackToken, id, name)
 		if err != nil {
 			// Log the error
-			log.Fatalln("Received an error in collecting/exporting", err)
+			log.Fatalln("Received an error in collecting/exporting logType: ", logType, err)
 		}
 	}
 	slog.Info("Done, Collected logs", "logType", logType, "iteration", iteration)
@@ -59,6 +60,22 @@ func CollectLogs(interval time.Duration, c common.CollectLogs, logType string) {
 		}
 	}
 	wg.Wait()
+}
+
+
+func getChannelsBeforeCollectingConversations(interval time.Duration) {
+	if !(args.GetChannelDetailsEnabled()) {
+		go CollectLogs(defaultChannelLogsInterval, channellogs.NewChannelLogsHandler(logClient), "ChannelDetails")
+	}
+	for {
+		if !(channellogs.GetChannelStatus()) {
+			time.Sleep(1 * time.Second)
+		} else {
+			time.Sleep(1 * time.Second)
+			go CollectLogs(interval, conversationlogs.NewConversationLogsHandler(logClient), "ConversationLogs")
+			return
+		}
+	}
 }
 
 func main() {
@@ -107,7 +124,7 @@ func main() {
 	if  args.GetConversationLogsEnabled() {
 		slog.Info("ConversationLogs enabled: Initiating Slack API logs collection for ConversationLogs")
 		interval := args.GetConversationLogsPollingInterval()
-		go CollectLogs(interval, conversationlogs.NewConversationLogsHandler(logClient), "ConversationLogs")
+		getChannelsBeforeCollectingConversations(interval)
 	}
 	select {}
 	slog.Info("Exiting Slack API logs collection")

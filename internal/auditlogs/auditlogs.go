@@ -175,9 +175,8 @@ func getTimeRange() (int64, int64){
         currentTime := time.Now()
         lastFetched := currentTime.Unix()
 	flushInterval := args.GetAuditLogsPollingInterval()
-        interval := time.Duration(flushInterval)
-        slog.Info("Collecting audit logs", "for last(in minutes)", interval)
-        lastBeforeFetched := currentTime.Add(-(interval) * time.Minute).Unix()
+        slog.Info("Collecting audit logs", "for last(in minutes)", flushInterval.Minutes())
+        lastBeforeFetched := currentTime.Add(-(flushInterval) * time.Minute).Unix()
 	return lastBeforeFetched, lastFetched
 } 
 

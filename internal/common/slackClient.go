@@ -86,7 +86,7 @@ func (c *SlackClient) SendRequest(retryCallback RetryCallback, responseData inte
 	}
 
 	req.Header.Set("Authorization", "Bearer "+c.SlackToken)
-	
+
 	response, errClient := HttpClient.Do(req)
 	if errClient != nil {
 		return errClient

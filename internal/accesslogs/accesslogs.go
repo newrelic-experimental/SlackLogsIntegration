@@ -103,9 +103,8 @@ func (al *accessLogsHandler) Collect(token string, teamId string, teamName strin
 	slackToken = token
 	currentTime := time.Now()
 	lastFetched := currentTime.Unix()
-	interval := time.Duration(flushInterval)
-	slog.Info("Collecting access logs", "for last(in minutes)", interval)
-	lastBeforeFetched := currentTime.Add(-(interval) * time.Minute).Unix()
+	slog.Info("Collecting access logs", "for last(in minutes)", flushInterval.Minutes())
+	lastBeforeFetched := currentTime.Add(-(flushInterval)).Unix()
 	for {
 		c := common.NewSlackClient(constants.SlackaccessAPIURL, token, nextCursor)
 		// Get access logs

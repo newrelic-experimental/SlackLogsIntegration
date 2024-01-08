@@ -10,6 +10,7 @@ import (
 	"slackLogs/internal/logclient"
 	"slackLogs/internal/model"
 	"slackLogs/internal/constants"
+	"slackLogs/internal/args"
 )
 
 var (
@@ -20,6 +21,8 @@ var (
 
 var logs = []logclient.Logs{}
 var slackToken string
+var channelsInfo = make(map[string]string)
+var isClosed = false
 
 type ChannelLogsHandler struct {
 	Client *logclient.LogClient
@@ -76,6 +79,10 @@ func transformChannelLogs(channelLogs []model.Channel, teamName string) error {
 }
 
 func (cl *ChannelLogsHandler) ResetLogs() {
+	if (!args.GetChannelDetailsEnabled()) {
+		return
+	}
+
 	if len(logs) > 0 {
 		cl.Client.Flush(logtype, logs)
 	}
@@ -84,11 +91,22 @@ func (cl *ChannelLogsHandler) ResetLogs() {
 	logCount = 0
 }
 
+func updateChannelsInfo(channelsListCh chan<- map[string]string) {
+        channelsListCh <- channelsInfo
+}
+
+func closeChannelsInfo(channelsListCh chan<- map[string]string) {
+	close(channelsListCh)
+}
+
 func (cl *ChannelLogsHandler) Collect(token string, teamId string, teamName string) error {
 	slog.Info("Collecting channel deatils")
 	nextCursor := ""
 	logCount = 0
 	slackToken = token
+	var ChannelsListCh = make(chan map[string]string)
+	isClosed = true
+	//go common.RecvChannelsInfo()
 	for {
 		c := common.NewSlackClient(constants.SlackChannelAPIURL, slackToken, nextCursor)
 		// Get Channel logs
@@ -96,6 +114,10 @@ func (cl *ChannelLogsHandler) Collect(token string, teamId string, teamName stri
 		if err != nil {
 			return err
 		}
+		for _, l := range response.Channels {
+			channelsInfo[l.ID] = l.Name
+                }
+		updateChannelsInfo(ChannelsListCh)
 		// Filter required fields and add timestamp to each log
 		err = transformChannelLogs(response.Channels, teamName)
 		if err != nil {
@@ -113,31 +135,33 @@ func (cl *ChannelLogsHandler) Collect(token string, teamId string, teamName stri
 		}
 		nextCursor = next
 	}
+	closeChannelsInfo(ChannelsListCh)
 	// Flush rest of the logs
         cl.ResetLogs()
 	return nil
 }
 
-func GetChannels(token string, teamId string) (map[string]string, error) {
-        slog.Info("Collecting channel ids")
-        nextCursor := ""
-	var channelsInfo = make(map[string]string)
-	for {
-		c := common.NewSlackClient(constants.SlackChannelAPIURL, token, nextCursor)
-		// Get Channel logs
-		response, err := getSlackChannelLogs(c, teamId)
-		if err != nil {
-			return channelsInfo, err
-		}
-		for _, l := range response.Channels {
-			channelsInfo[l.ID] = l.Name
-		}
-		next := response.ResponseMetaData.NextCursor
-		if next == "" {
-			slog.Debug("Done with fetching all the channels, now iterate through the channels to get conversations")
-			break
-		}
-		nextCursor = next
-	}
-	return channelsInfo, nil
+
+func RecvChannelsInfo(channelsListCh <-chan map[string]string) {
+        for {
+                slog.Info("Receiving the channels")
+                channels, ok := <- channelsListCh
+                if !ok {
+                        slog.Info("Received all the channels. Closed.")
+                        isClosed = true
+                        return
+                }
+                for key, value := range channels {
+                        channelsInfo[key] = value
+                }
+        }
+}
+
+func GetChannelsInfo() map[string]string {
+        return channelsInfo
+}
+
+func GetChannelStatus() bool {
+        slog.Info("GetChannelStatus", "isClosed", isClosed)
+        return isClosed
 }
