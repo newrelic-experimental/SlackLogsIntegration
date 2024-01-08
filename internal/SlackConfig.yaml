@@ -20,5 +20,5 @@ accessLogs:
   pollingInterval: 5m
 
 auditLogs:
-  enabled: False
+  enabled: True
   pollingInterval: 5m
