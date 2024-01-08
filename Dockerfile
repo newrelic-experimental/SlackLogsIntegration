@@ -9,6 +9,8 @@ RUN git clone https://github.com/newrelic-experimental/SlackLogsIntegration.git
 
 WORKDIR SlackLogsIntegration
 
+COPY internal/SlackConfig.yaml /
+
 # Build the executable
 RUN GOARCH=amd64 GOOS=linux go build -o /slackLogger internal/main.go
 
@@ -18,5 +20,7 @@ FROM alpine AS build-release-stage
 WORKDIR /
 
 COPY --from=build-stage /slackLogger /slackLogger
+
+COPY --from=build-stage /SlackConfig.yaml /SlackConfig.yaml
 
 ENTRYPOINT ["/slackLogger" ]
