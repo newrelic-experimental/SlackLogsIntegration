@@ -15,6 +15,7 @@ Send following Slack API logs to New Relic's Log API. 🚧 This project is curre
 
   Please [refer Development](#Development) if you need help to create a Slack app.
 - Get New Relic ingest key. Use this key as a INGEST_KEY system variable.
+- Review SlackCongif.yaml in the repository and modify configuration accordingly.
 
 ### Installation
 Slack logs integration can be installed in two ways
