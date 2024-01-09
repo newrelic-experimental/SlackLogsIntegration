@@ -15,6 +15,7 @@ Send following Slack API logs to New Relic's Log API. 🚧 This project is curre
 
   Please [refer Development](#Development) if you need help to create a Slack app.
 - Get New Relic ingest key. Use this key as a INGEST_KEY system variable.
+- Review SlackCongif.yaml in the repository and modify configuration accordingly.
 
 ### Installation
 Slack logs integration can be installed in two ways
@@ -25,7 +26,7 @@ Slack logs integration can be installed in two ways
 - Refer [Configuration](#configuration) for available config options
 - Start the application in side the container, with required params
 ```bash
-docker run -e SLACK_ACCESS_TOKEN=<token> -e INGEST_KEY=<key> slack-logger -logApiEndpoint=https://log-api.newrelic.com/log/v1 -logLevel=info -channelDetails -userLogs -accessLogs -conversationLogs -auditLogs
+docker run -e SLACK_ACCESS_TOKEN=<token> -e INGEST_KEY=<key> slack-logger
 ```
 #### Option 2: Standalone binary
 - Build binary from the source code
@@ -39,30 +40,36 @@ docker run -e SLACK_ACCESS_TOKEN=<token> -e INGEST_KEY=<key> slack-logger -logAp
 - ` export INGEST_KEY=<key> `
 - Start application directly on host
 ```bash
-  /slackLogger -logApiEndpoint=https://log-api.newrelic.com/log/v1 -logLevel=info  -channelDetails  -userLogs -accessLogs -conversationLogs
--auditLogs
+  /slackLogger
 ```
 
 ### Configuration
-Configuration with defaults is self-describing for this application:
+Configuration ```SlackConfig.yaml``` with defaults is self-describing for this application:
 ```bash
-Usage of /slackLogger:
-  -accessLogs
-    	Fetch access logs
-  -auditLogs
-    	Fetch audit logs
-  -channelDetails
-    	Fetch channel details
-  -conversationLogs
-    	Fetch conversation logs
-  -flushInterval int
-    	Flush interval in minutes (default 1440)
-  -logApiEndpoint string
-    	New Relic log endpoint (default "https://log-api.newrelic.com/log/v1")
-  -logLevel string
-    	Golang slog log level: debug | info | warn | error (default "info")
-  -userLogs
-    	Fetch user logs
+global:
+  flushLogSize: 1MB
+  logAPIEndPoint: https://log-api.newrelic.com/log/v1
+  logLevel: info
+
+conversationLogs:
+  enabled: True
+  pollingInterval: 5m
+
+channelDetails:
+  enabled: True
+  pollingInterval: 6h
+
+userLogs:
+  enabled: True
+  pollingInterval: 24m
+
+accessLogs:
+  enabled: True
+  pollingInterval: 5m
+
+auditLogs:
+  enabled: True
+  pollingInterval: 5m
 ```
 
 ### Browse your Log data in NR
