@@ -104,10 +104,11 @@ func (cl *ChannelLogsHandler) Collect(token string, teamId string, teamName stri
 	nextCursor := ""
 	logCount = 0
 	slackToken = token
-	var ChannelsListCh = make(chan map[string]string)
+	slog.Info("Creating new chaneell")
 	isClosed = true
-	//go common.RecvChannelsInfo()
 	for {
+		var ChannelsListCh = make(chan map[string]string)
+		go RecvChannelsInfo(ChannelsListCh)
 		c := common.NewSlackClient(constants.SlackChannelAPIURL, slackToken, nextCursor)
 		// Get Channel logs
 		response, err := getSlackChannelLogs(c, teamId)
@@ -117,7 +118,8 @@ func (cl *ChannelLogsHandler) Collect(token string, teamId string, teamName stri
 		for _, l := range response.Channels {
 			channelsInfo[l.ID] = l.Name
                 }
-		updateChannelsInfo(ChannelsListCh)
+	   	ChannelsListCh <- channelsInfo
+		closeChannelsInfo(ChannelsListCh)
 		// Filter required fields and add timestamp to each log
 		err = transformChannelLogs(response.Channels, teamName)
 		if err != nil {
@@ -135,7 +137,6 @@ func (cl *ChannelLogsHandler) Collect(token string, teamId string, teamName stri
 		}
 		nextCursor = next
 	}
-	closeChannelsInfo(ChannelsListCh)
 	// Flush rest of the logs
         cl.ResetLogs()
 	return nil

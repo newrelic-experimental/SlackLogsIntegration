@@ -116,7 +116,6 @@ func init() {
 		log.Fatalln("****  Please set INGEST_KEY. *****")
 	}
 
-
 	// Specify the path to YAML config file
         configFilePath := "SlackConfig.yaml"
 
@@ -141,34 +140,39 @@ func init() {
         nrUrlLog = config.Global.LogApiEndpoint
         logLevel = config.Global.LogLevel
 	fetchAccessLogs = config.AccessLogs.Enabled
-	accessLogsPollingInterval, err = parseDuration(config.AccessLogs.PollingInterval)
-	if err != nil {
-		log.Fatalf("Error: %v, Please provide allowed pollingInterval for AccessLogs %v", err, config.AccessLogs.PollingInterval)
-		return
+	if (fetchAccessLogs) {
+		accessLogsPollingInterval, err = parseDuration(config.AccessLogs.PollingInterval)
+		if err != nil {
+			log.Fatalf("Error: %v, Please provide allowed pollingInterval for AccessLogs %v", err, config.AccessLogs.PollingInterval)
+		}
 	}
 	fetchUserLogs = config.UserLogs.Enabled
-	userLogsPollingInterval, err = parseDuration(config.UserLogs.PollingInterval)
-	if err != nil {
-		log.Fatalf("Error: %v, Please provide allowed pollingInterval for UserLogs", config.UserLogs.PollingInterval)
-		return
+	if (fetchUserLogs) {
+		userLogsPollingInterval, err = parseDuration(config.UserLogs.PollingInterval)
+		if err != nil {
+			log.Fatalf("Error: %v, Please provide allowed pollingInterval for UserLogs", config.UserLogs.PollingInterval)
+		}
 	}
 	fetchConversationLogs = config.ConversationLogs.Enabled
-	conversationLogsPollingInterval, err = parseDuration(config.ConversationLogs.PollingInterval)
-	if err != nil {
-		log.Fatalf("Error: %v, Please provide allowed pollingInterval for ConversationLogs", config.ConversationLogs.PollingInterval)
-		return
+	if (fetchConversationLogs) {
+		conversationLogsPollingInterval, err = parseDuration(config.ConversationLogs.PollingInterval)
+		if err != nil {
+			log.Fatalf("Error: %v, Please provide allowed pollingInterval for ConversationLogs", config.ConversationLogs.PollingInterval)
+		}
 	}
 	fetchChannelDetails = config.ChannelDetails.Enabled
-	channelDetailsPollingInterval, err = parseDuration(config.ChannelDetails.PollingInterval)
-	if err != nil {
-		log.Fatalf("Error: %v, Please provide allowed pollingInterval for ChannelDetails", config.AccessLogs.PollingInterval)
-		return
+	if (fetchChannelDetails) {
+		channelDetailsPollingInterval, err = parseDuration(config.ChannelDetails.PollingInterval)
+		if err != nil {
+			log.Fatalf("Error: %v, Please provide allowed pollingInterval for ChannelDetails", config.AccessLogs.PollingInterval)
+		}
 	}
 	fetchAuditLogs = config.AuditLogs.Enabled
-	auditLogsPollingInterval, err = parseDuration(config.AuditLogs.PollingInterval)
-	if err != nil {
-		log.Fatalf("Error: %v, Please provide allowed pollingInterval for AuditLogs", config.AuditLogs.PollingInterval)
-		return
+	if (fetchAuditLogs) {
+		auditLogsPollingInterval, err = parseDuration(config.AuditLogs.PollingInterval)
+		if err != nil {
+			log.Fatalf("Error: %v, Please provide allowed pollingInterval for AuditLogs", config.AuditLogs.PollingInterval)
+		}
 	}
 
 	// Setup slog
