@@ -9,7 +9,7 @@ RUN git clone https://github.com/newrelic-experimental/SlackLogsIntegration.git
 
 WORKDIR SlackLogsIntegration
 
-COPY internal/SlackConfig.yaml /
+COPY SlackConfig.yaml /
 
 # Build the executable
 RUN GOARCH=amd64 GOOS=linux go build -o /slackLogger internal/main.go
