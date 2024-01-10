@@ -7,8 +7,29 @@ type User struct {
         TeamName          string         `json:"team_name"` // This is not part of UserList repsonse.
         Billable          bool         `json:"billable"` // This is not part of UserList repsonse.
         Name              string         `json:"name"`
-        Updated           int64          `json:"updated"`
-        Random            map[string]interface{} `json:"-"`
+        Deleted           bool           `json:"deleted"`
+        Color             string         `json:"color"`
+        RealName          string         `json:"real_name"`
+        TZ                string         `json:"tz,omitempty"`
+        TZLabel           string         `json:"tz_label"`
+        TZOffset          int            `json:"tz_offset"`
+        IsBot             bool           `json:"is_bot"`
+        IsAdmin           bool           `json:"is_admin"`
+        IsOwner           bool           `json:"is_owner"`
+        IsPrimaryOwner    bool           `json:"is_primary_owner"`
+        IsRestricted      bool           `json:"is_restricted"`
+        IsUltraRestricted bool           `json:"is_ultra_restricted"`
+        IsStranger        bool           `json:"is_stranger"`
+        IsAppUser         bool           `json:"is_app_user"`
+        IsInvitedUser     bool           `json:"is_invited_user"`
+        Has2FA            bool           `json:"has_2fa"`
+        TwoFactorType     *string        `json:"two_factor_type"`
+        HasFiles          bool           `json:"has_files"`
+        Presence          string         `json:"presence"`
+        Locale            string         `json:"locale"`
+        Updated           int64       `json:"updated"`
+	Random            map[string]interface{} `json:"-"`
+
 }
 
 // UserProfile contains all the information of a user
